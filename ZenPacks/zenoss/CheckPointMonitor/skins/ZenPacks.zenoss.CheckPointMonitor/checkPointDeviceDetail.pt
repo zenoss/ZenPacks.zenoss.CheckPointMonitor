@@ -1,0 +1,74 @@
+<tal:block metal:use-macro="here/templates/macros/page2">
+<tal:block metal:fill-slot="contentPane">
+
+<tal:block metal:use-macro="here/zenuimacros/macros/zentable-slidingdoors">
+<tal:block metal:fill-slot="title">CheckPoint Information</tal:block>
+<tal:block metal:fill-slot="body">
+<div class="yui-g zentable-modified">
+    <div class="yui-u first">
+        <div class="zentable-modified-column">
+            Firewall
+            <dl class="faux-table">
+                <dt class="first">Status</dt>
+                <dd class="first"><img border="0" tal:attributes="
+                    src python:here.getStatusImgSrc(here.getFwStatus())"/>
+                </dd>
+                <dt>Policy</dt>
+                <dd><div tal:content="here/getFwPolicyName"/></dd>
+                <dt>Install Time</dt>
+                <dd><div tal:content="here/getFwInstallTime"/></dd>
+            </dl>
+            <br/>
+
+            High Availability
+            <dl class="faux-table">
+                <dt class="first">Status</dt>
+                <dd class="first"><img border="0" tal:attributes="
+                    src python:here.getStatusImgSrc(here.getHaStatus())"/>
+                </dd>
+                <dt>Installed</dt>
+                <dd><div tal:content="here/getHaInstalled"/></dd>
+                <dt>Started</dt>
+                <dd><div tal:content="here/getHaStarted"/></dd>
+            </dl>
+            <br/>
+            
+            Policy Server
+            <dl class="faux-table">
+                <dt class="first">Status</dt>
+                <dd class="first"><img border="0" tal:attributes="
+                    src python:here.getStatusImgSrc(here.getDtpsStatus())"/>
+                </dd>
+                <dt>Licensed Users</dt>
+                <dd><div tal:content="here/getDtpsLicensedUsers"/></dd>
+            </dl>
+        </div>
+    </div>
+    
+    <div class="yui-u">
+        <div class="zentable-modified-column" style="background-color:#f2f2f2">
+            Versions
+            <dl class="faux-table">
+                <dt class="first">OS</dt>
+                <dd class="first">
+                    <div tal:content="here/getOsVersionString"/>
+                </dd>
+                <dt>SVN</dt>
+                <dd><div tal:content="here/getSvnVersionString"/></dd>
+                <dt>Firewall</dt>
+                <dd><div tal:content="here/getFwVersionString"/></dd>
+                <dt>VPN</dt>
+                <dd><div tal:content="here/getCpvVersionString"/></dd>
+                <dt>High Availability</dt>
+                <dd><div tal:content="here/getHaVersionString"/></dd>
+                <dt>Policy Server</dt>
+                <dd><div tal:content="here/getDtpsVersionString"/></dd>
+            </dl>
+        </div>
+    </div>
+</div>
+</tal:block>
+</tal:block>
+
+</tal:block>
+</tal:block>
