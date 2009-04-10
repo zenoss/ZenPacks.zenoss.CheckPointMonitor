@@ -1424,9 +1424,6 @@ SecurePlatform (NGX R65)
 <property type="boolean" id="isOS" mode="w" >
 False
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Network/Check Point/SPLAT/devices/checkpoint-fw/os'/>
-</tomany>
 </object>
 </tomanycont>
 </object>
