@@ -2,6 +2,9 @@
 <objects>
 <!-- ('', 'zport', 'dmd', 'Devices', 'Network', 'Check Point') -->
 <object id='/zport/dmd/Devices/Network/Check Point' module='Products.ZenModel.DeviceClass' class='DeviceClass'>
+<property type="lines" id="devtypes" mode="w" >
+[('Check Point', 'SNMP')]
+</property>
 <property visible="True" type="string" id="zPythonClass" >
 ZenPacks.zenoss.CheckPointMonitor.CheckPointDevice
 </property>
@@ -1400,6 +1403,9 @@ AVERAGE
 </object>
 </tomanycont>
 <object id='SPLAT' module='Products.ZenModel.DeviceClass' class='DeviceClass'>
+<property type="lines" id="devtypes" mode="w" >
+[('Check Point SPLAT', 'SNMP')]
+</property>
 <property visible="True" type="lines" id="zCollectorPlugins" >
 ['zenoss.snmp.NewDeviceMap', 'zenoss.snmp.DeviceMap', 'CheckPoint.DeviceMap', 'zenoss.snmp.CpuMap', 'zenoss.snmp.UCDHardDiskMap', 'zenoss.snmp.InterfaceMap', 'zenoss.snmp.RouteMap', 'zenoss.snmp.HRFileSystemMap', 'zenoss.snmp.HRSWRunMap', 'zenoss.snmp.IpServiceMap', 'zenoss.snmp.HRSWInstalledMap']
 </property>
