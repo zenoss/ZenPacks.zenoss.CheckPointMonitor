@@ -5,7 +5,7 @@
 ######################################################################
 
 from Products.DataCollector.plugins.CollectorPlugin import SnmpPlugin, GetMap
-from Products.DataCollector.plugins.DataMaps import ObjectMap
+from Products.DataCollector.plugins.DataMaps import ObjectMap, MultiArgs
 
 class DeviceMap(SnmpPlugin):
     """Maps device level information from Trango access points
@@ -49,7 +49,23 @@ class DeviceMap(SnmpPlugin):
         if getdata['fwModuleState'] is None: return None
         maps = []
         om = self.objectMap(getdata)
-        om.setOSProductKey = "%s (%s)" % (om.osName, om.osVersionLevel)
+        
+        # Handle all of the OS possibilities.
+        if "SecurePlatform" in om.osName:
+            manufacturer = "Check Point"
+        elif "Nokia" in om.osName:
+            manufacuturer = "Nokia"
+        elif "Linux" in om.osName:
+            manufacturer = "Linux"
+        elif "Solaris" in om.osName:
+            manufacturer = "Sun"
+        elif "Windows" in om.osName:
+            manufacturer = "Microsoft"
+        else:
+            manufacturer = "Unknown"
+        
+        om.setOSProductKey = MultiArgs(
+            "%s (%s)" % (om.osName, om.osVersionLevel), manufacturer)
         maps.append(om)
         maps.append(ObjectMap({"totalMemory": om.memTotalReal}, compname="hw"))
         maps.append(ObjectMap({"totalSwap": om.memTotalVirtual}, compname="os"))
