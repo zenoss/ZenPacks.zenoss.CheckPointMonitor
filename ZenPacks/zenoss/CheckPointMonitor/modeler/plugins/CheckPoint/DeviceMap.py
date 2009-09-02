@@ -4,6 +4,10 @@
 #
 ######################################################################
 
+__doc__ = """DeviceMap
+Maps device level information from Trango access points
+"""
+
 from Products.DataCollector.plugins.CollectorPlugin import SnmpPlugin, GetMap
 from Products.DataCollector.plugins.DataMaps import ObjectMap, MultiArgs
 
