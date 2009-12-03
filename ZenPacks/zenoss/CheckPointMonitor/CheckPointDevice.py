@@ -42,18 +42,18 @@ class CheckPointDevice(Device):
     _properties = Device._properties + (
         {'id':'fwModuleState', 'type':'string', 'mode':'w'},
 
-        {'id':'fwVerMajor', 'type':'int', 'mode':'w'},
-        {'id':'fwVerMinor', 'type':'int', 'mode':'w'},
+        {'id':'fwVerMajor', 'type':'string', 'mode':'w'},
+        {'id':'fwVerMinor', 'type':'string', 'mode':'w'},
         {'id':'fwPolicyName', 'type':'string', 'mode':'w'},
         {'id':'fwInstallTime', 'type':'string', 'mode':'w'},
 
-        {'id':'cpvVerMajor', 'type':'int', 'mode':'w'},
-        {'id':'cpvVerMinor', 'type':'int', 'mode':'w'},
+        {'id':'cpvVerMajor', 'type':'string', 'mode':'w'},
+        {'id':'cpvVerMinor', 'type':'string', 'mode':'w'},
 
-        {'id':'haInstalled', 'type':'int', 'mode':'w'},
-        {'id':'haVerMajor', 'type':'int', 'mode':'w'},
-        {'id':'haVerMinor', 'type':'int', 'mode':'w'},
-        {'id':'haStarted', 'type':'int', 'mode':'w'},
+        {'id':'haInstalled', 'type':'string', 'mode':'w'},
+        {'id':'haVerMajor', 'type':'string', 'mode':'w'},
+        {'id':'haVerMinor', 'type':'string', 'mode':'w'},
+        {'id':'haStarted', 'type':'string', 'mode':'w'},
         {'id':'haState', 'type':'string', 'mode':'w'},
 
         {'id':'svnVersion', 'type':'string', 'mode':'w'},
@@ -61,9 +61,9 @@ class CheckPointDevice(Device):
         {'id':'osName', 'type':'string', 'mode':'w'},
         {'id':'osVersionLevel', 'type':'string', 'mode':'w'},
 
-        {'id':'dtpsVerMajor', 'type':'int', 'mode':'w'},
-        {'id':'dtpsVerMinor', 'type':'int', 'mode':'w'},
-        {'id':'dtpsLicensedUsers', 'type':'int', 'mode':'w'},
+        {'id':'dtpsVerMajor', 'type':'string', 'mode':'w'},
+        {'id':'dtpsVerMinor', 'type':'string', 'mode':'w'},
+        {'id':'dtpsLicensedUsers', 'type':'string', 'mode':'w'},
         )
     
     
@@ -94,22 +94,22 @@ class CheckPointDevice(Device):
     
     def getFwVersionString(self):
         if self.fwVerMajor is not None and self.fwVerMinor is not None:
-            return "%d.%d" % (self.fwVerMajor, self.fwVerMinor)
+            return "%s.%s" % (self.fwVerMajor, self.fwVerMinor)
         return "Unknown"
     
     def getCpvVersionString(self):
         if self.cpvVerMajor is not None and self.cpvVerMinor is not None:
-            return "%d.%d" % (self.cpvVerMajor, self.cpvVerMinor)
+            return "%s.%s" % (self.cpvVerMajor, self.cpvVerMinor)
         return "Unknown"
     
     def getHaVersionString(self):
         if self.haVerMajor is not None and self.haVerMinor is not None:
-            return "%d.%d" % (self.haVerMajor, self.haVerMinor)
+            return "%s.%s" % (self.haVerMajor, self.haVerMinor)
         return "Unknown"
     
     def getDtpsVersionString(self):
         if self.dtpsVerMajor is not None and self.dtpsVerMinor is not None:
-            return "%d.%d" % (self.dtpsVerMajor, self.dtpsVerMinor)
+            return "%s.%s" % (self.dtpsVerMajor, self.dtpsVerMinor)
         return "Unknown"
     
     def getFwPolicyName(self):

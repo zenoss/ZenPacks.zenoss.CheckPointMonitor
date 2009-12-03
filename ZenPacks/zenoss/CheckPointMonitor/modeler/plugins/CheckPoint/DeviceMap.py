@@ -12,7 +12,7 @@ from Products.DataCollector.plugins.CollectorPlugin import SnmpPlugin, GetMap
 from Products.DataCollector.plugins.DataMaps import ObjectMap, MultiArgs
 
 class DeviceMap(SnmpPlugin):
-    """Maps device level information from Trango access points
+    """Maps device level information from CheckPoint firewalls
     """
         
     snmpGetMap = GetMap({
