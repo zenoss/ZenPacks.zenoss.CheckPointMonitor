@@ -44,6 +44,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='diskPercent' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Percent of free space. 
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -80,6 +83,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='dtpsConnectedUsers' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Connected users. 
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -139,6 +145,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='fwAccepted' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+The number of accepted packets.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 DERIVE
 </property>
@@ -172,6 +181,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='fwDropped' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+The number of dropped packets.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 DERIVE
 </property>
@@ -205,6 +217,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='fwLogged' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+The number of logged packets.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 DERIVE
 </property>
@@ -238,6 +253,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='fwNumConn' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Number of connections.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -271,6 +289,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='fwPeakNumConn' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Peak number of connections. 
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -304,6 +325,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='fwRejected' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+The number of rejected packets.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 DERIVE
 </property>
@@ -389,6 +413,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='memActiveReal' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Active real memory (32 bit)
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -422,6 +449,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='memActiveVirtual' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Active virtual memory (32 bit)
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -455,6 +485,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='procSysTime' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Processor system time.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -491,6 +524,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='procUsage' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Processor usage. 
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -527,6 +563,9 @@ False
 </property>
 <tomanycont id='datapoints'>
 <object id='procUsrTime' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Processor user time. 
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -542,6 +581,9 @@ True
 </tomanycont>
 <tomanycont id='thresholds'>
 <object id='CPU utilization' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
+<property type="text" id="zendoc" mode="w" >
+This threshold monitors the value for the procUsage_procUsage DataPoint and when the value for gets above the default percentage value of 95 an event is sent.
+</property>
 <property type="lines" id="dsnames" mode="w" >
 ['procUsage_procUsage']
 </property>
@@ -562,6 +604,9 @@ True
 </property>
 </object>
 <object id='disk utilization' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
+<property type="text" id="zendoc" mode="w" >
+This threshold monitors the value for the diskPercent_diskPercent DataPoint and when the value is above the default percentage value of 95 an event is sent.
+</property>
 <property type="lines" id="dsnames" mode="w" >
 ['diskPercent_diskPercent']
 </property>
@@ -582,6 +627,9 @@ True
 </property>
 </object>
 <object id='licensed users' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
+<property type="text" id="zendoc" mode="w" >
+This threshold monitors the value for the dtpsConnectedUsers_dtpsConnectedUsers DataPoint and when the value gets above the default percentage value an event is sent.
+</property>
 <property type="lines" id="dsnames" mode="w" >
 ['dtpsConnectedUsers_dtpsConnectedUsers']
 </property>
@@ -602,6 +650,9 @@ max(0, (here.dtpsLicensedUsers or 0) - 5)
 </property>
 </object>
 <object id='memory utilization' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
+<property type="text" id="zendoc" mode="w" >
+This threshold monitors the value for the memActiveReal_memActiveReal DataPoint and when the value gets above the default percentage value of 90 an event is sent.
+</property>
 <property type="lines" id="dsnames" mode="w" >
 ['memActiveReal_memActiveReal']
 </property>
@@ -622,6 +673,9 @@ here.hw.totalMemory * .9
 </property>
 </object>
 <object id='swap utilization' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
+<property type="text" id="zendoc" mode="w" >
+This threshold monitors the value for the memActiveVirtual_memActiveVirtual DataPoint and when the value gets above the default percentage value of 50 an event is sent.
+</property>
 <property type="lines" id="dsnames" mode="w" >
 ['memActiveVirtual_memActiveVirtual']
 </property>
