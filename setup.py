@@ -8,7 +8,7 @@ AUTHOR = "Zenoss"
 LICENSE = ""
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
 PACKAGES = ['ZenPacks', 'ZenPacks.zenoss', 'ZenPacks.zenoss.CheckPointMonitor']
-INSTALL_REQUIRES = []
+INSTALL_REQUIRES = ['Zenoss >= 2.4']
 COMPAT_ZENOSS_VERS = ">=2.4"
 PREV_ZENPACK_NAME = ""
 # STOP_REPLACEMENTS
