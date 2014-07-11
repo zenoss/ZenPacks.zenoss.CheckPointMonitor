@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:reference" "reference.dtd">
+<reference id="referenceid">
+  <title>(CheckPointMonitor) Check Point Security Appliance</title>
+  <shortdesc>The <zenpack>ZenPacks.zenoss.CheckPointMonitor</zenpack> ZenPack monitors security appliances from Check Point.</shortdesc>
+  <refbody>
+    <section>
+      <p>With this ZenPack, you can ensure that the firewall module has a policy installed, 
+        HA is in a proper state, and that the policy server (for SecureClient) is running.</p>
+    </section>
+  </refbody>
+</reference>
