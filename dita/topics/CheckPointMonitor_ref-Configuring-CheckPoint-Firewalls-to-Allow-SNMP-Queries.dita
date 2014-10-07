@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:reference" "reference.dtd">
+<reference id="d15e66"><title>Configuring Check Point Firewalls to Allow SNMP Queries</title><refbody><section>
+  <p>Configure the Check Point firewall to allow SNMP queries from 
+        <ph conkeyref="names/platform"/>, and to
+        send SNMP v1 or SNMP v2 traps to <ph conkeyref="names/platform"/>.</p></section></refbody></reference>
