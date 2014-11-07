@@ -3034,9 +3034,6 @@ Gaia (2.6)
 <property type="boolean" id="isOS" mode="w" >
 True
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Network/Check Point/Gaia/devices/CheckPoint-Gaia/os'/>
-</tomany>
 </object>
 <object id='SecurePlatform (NGX R65)' module='Products.ZenModel.SoftwareClass' class='SoftwareClass'>
 <property type="string" id="name" mode="w" >
