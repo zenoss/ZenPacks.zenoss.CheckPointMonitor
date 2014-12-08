@@ -13,6 +13,12 @@ from Globals import InitializeClass
 
 from Products.ZenModel.Device import Device
 from Products.ZenModel.ZenossSecurity import ZEN_VIEW
+from Products.Zuul import getFacade
+
+from zenoss.protocols.protobufs.zep_pb2 import (
+    STATUS_NEW, STATUS_ACKNOWLEDGED, STATUS_SUPPRESSED,
+    SEVERITY_CRITICAL, SEVERITY_ERROR, SEVERITY_WARNING,
+    )
 
 
 class CheckPointDevice(Device):
@@ -127,7 +133,7 @@ class CheckPointDevice(Device):
         return self.fwInstallTime or "Unknown"
 
     def getFwStatus(self):
-        return self.getStatus(where="component = 'firewall'")
+        return self.getComponentStatus('firewall')
 
     def getHaInstalled(self):
         if self.haInstalled:
@@ -140,7 +146,7 @@ class CheckPointDevice(Device):
         return False
 
     def getHaStatus(self):
-        return self.getStatus(where="component = 'HA'")
+        return self.getComponentStatus('HA')
 
     def getDtpsLicensedUsers(self):
         if self.dtpsLicensedUsers is not None:
@@ -148,7 +154,22 @@ class CheckPointDevice(Device):
         return "Unknown"
 
     def getDtpsStatus(self):
-        return self.getStatus(where="component = 'policy server'")
+        return self.getComponentStatus('policy server')
+
+    def getComponentStatus(self, component_id):
+        zep = getFacade('zep')
+
+        event_filter = zep.createEventFilter(
+            tags=[self.getUUID()],
+            element_sub_identifier=[component_id],
+            severity=[SEVERITY_WARNING, SEVERITY_ERROR, SEVERITY_CRITICAL],
+            status=[STATUS_NEW, STATUS_ACKNOWLEDGED, STATUS_SUPPRESSED],
+            event_class=['/Status/*'])
+
+        summaries = zep.getEventSummaries(
+            offset=0, limit=0, filter=event_filter)
+
+        return summaries['total']
 
 
 InitializeClass(CheckPointDevice)
