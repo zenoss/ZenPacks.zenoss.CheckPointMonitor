@@ -35,7 +35,7 @@ class CheckPointHaStatePlugin(EasySnmpPlugin):
         elif state == "not active":
             print "HA is not active"
             exitStatus = 1
-        elif state == "stand-by":
+        elif state in ("standby", "stand-by"):
             print "HA is in stand-by"
         else:
             print "unknown HA state"
