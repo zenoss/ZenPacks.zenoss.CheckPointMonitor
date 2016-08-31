@@ -68,6 +68,10 @@ True
 <property type="string" id="rrdmax" mode="w" >
 100
 </property>
+<tomanycont id='aliases'>
+<object id='fs__pct' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -491,6 +495,23 @@ GAUGE
 <property type="boolean" id="isrow" mode="w" >
 True
 </property>
+<tomanycont id='aliases'>
+<object id='mem__pct' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+<property type="string" id="formula" mode="w" >
+${here/hw/totalMemory},/,100,*
+</property>
+</object>
+<object id='memoryAvailable__bytes' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+<property type="string" id="formula" mode="w" >
+${here/hw/totalMemory},EXC,-
+</property>
+</object>
+<object id='memoryUsed__pct' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+<property type="string" id="formula" mode="w" >
+${here/hw/totalMemory},/,100,*
+</property>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -623,6 +644,10 @@ True
 <property type="string" id="rrdmax" mode="w" >
 100
 </property>
+<tomanycont id='aliases'>
+<object id='cpu__pct' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -1432,6 +1457,11 @@ GAUGE
 True
 </property>
 <tomanycont id='aliases'>
+<object id='fs__pct' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+<property type="string" id="formula" mode="w" >
+${here/getTotalBlocks},/,100,*
+</property>
+</object>
 <object id='usedFilesystemSpace__bytes' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
 <property type="string" id="formula" mode="w" >
 ${here/blockSize},*
@@ -1667,6 +1697,10 @@ True
 <property type="string" id="description" mode="w" >
 Device metrics for Check Point firewalls.
 </property>
+<tomanycont id='aliases'>
+<object id='fs__pct' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -2114,6 +2148,23 @@ True
 <property type="string" id="description" mode="w" >
 Device metrics for Check Point firewalls.
 </property>
+<tomanycont id='aliases'>
+<object id='mem__pct' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+<property type="string" id="formula" mode="w" >
+${here/hw/totalMemory},/,100,*
+</property>
+</object>
+<object id='memoryAvailable__bytes' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+<property type="string" id="formula" mode="w" >
+${here/hw/totalMemory},EXC,-
+</property>
+</object>
+<object id='memoryUsed__pct' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+<property type="string" id="formula" mode="w" >
+${here/hw/totalMemory},/,100,*
+</property>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
@@ -2255,6 +2306,10 @@ True
 <property type="string" id="description" mode="w" >
 Device metrics for Check Point firewalls.
 </property>
+<tomanycont id='aliases'>
+<object id='cpu__pct' module='Products.ZenModel.RRDDataPointAlias' class='RRDDataPointAlias'>
+</object>
+</tomanycont>
 </object>
 </tomanycont>
 </object>
