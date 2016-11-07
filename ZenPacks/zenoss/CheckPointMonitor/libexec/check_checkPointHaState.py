@@ -25,7 +25,7 @@ class CheckPointHaStatePlugin(EasySnmpPlugin):
     oids = [haStateOID,]
     
     def onSuccess(self, result):
-        state = result[haStateOID]
+        state = str(result[haStateOID]).lower()
         global exitStatus
         if state is None:
             print "no HA state returned"
