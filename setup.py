@@ -3,13 +3,13 @@
 # or saved.  Do not modify them directly here.
 # NB: PACKAGES is deprecated
 NAME = "ZenPacks.zenoss.CheckPointMonitor"
-VERSION = "2.1.0"
+VERSION = "3.0.0dev"
 AUTHOR = "Zenoss"
 LICENSE = ""
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
 PACKAGES = ['ZenPacks', 'ZenPacks.zenoss', 'ZenPacks.zenoss.CheckPointMonitor']
-INSTALL_REQUIRES = []
-COMPAT_ZENOSS_VERS = ">=4.0"
+INSTALL_REQUIRES = ['ZenPacks.zenoss.ZenPackLib>=2.1.2']
+COMPAT_ZENOSS_VERS = ">=6.0.0"
 PREV_ZENPACK_NAME = ""
 # STOP_REPLACEMENTS
 ################################
