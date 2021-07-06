@@ -1,1 +1,367 @@
 name: ZenPacks.zenoss.CheckPointMonitor
+
+device_classes:
+  DEFAULTS:
+    remove: true
+    zProperties:
+      zSnmpMonitorIgnore: false
+      zPingMonitorIgnore: true  # ??
+
+  /Network/Check Point:
+    zProperties:
+      zPythonClass: ZenPacks.zenoss.CheckPointMonitor.CheckPointDevice
+      zCollectorPlugins:
+        - zenoss.snmp.DeviceMap
+        - zenoss.snmp.InterfaceMap
+        - zenoss.snmp.NewDeviceMap
+        - zenoss.snmp.RouteMap
+        - CheckPoint.DeviceMap
+      zDeviceTemplates:
+        - Device
+        - CheckPointDevice
+    templates:
+      FileSystem:
+        description: Filesystem template that uses HOST-RESOURCES mib. Has 95% threshold
+        targetPythonClass: Products.ZenModel.Device  # ?? Products.ZenModel.FileSystem
+        datasources:
+          usedBlocks:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.2.1.25.2.3.1.6
+            eventClass: /Cmd/Fail
+            datapoints:
+              usedBlocks:
+                aliases: {
+                  fs__pct: '${here/getTotalBlocks},/,100,*',
+                  usedFilesystemSpace__bytes: '${here/blockSize},*'
+                }
+        thresholds:
+          low disk:
+            eventClass: /Perf/Filesystem
+            severity: 5
+            dsnames: [usedBlocks_usedBlocks]
+            maxval: here.totalBlocks * .95
+            escalateCount: 0
+        graphs:
+          Utilization:
+            sequence: 0
+            height: 100
+            units: percentage
+            miny: 0
+            maxy: 100
+#                # check next properties:
+#                colors: ['#00cc00', '#0000ff', '#00ffff', '#ff0000', '#ffff00', '#cc0000', '#0000cc', '#0080c0', '#8080c0', '#ff0080', '#800080', '#0000a0', '#408080', '#808000', '#000000', '#00ff00', '#fb31fb', '#0080ff', '#ff8000', '#800000']
+#                custom: {CDEF:percent=usedBlocks_usedBlocks,${here/totalBlocks},/,100,*
+#                  AREA:percent#00cc00:utilization}
+            graphpoints:
+              low disk:
+                sequence: 0
+                type: ThresholdGraphPoint
+                threshId: low disk
+                legend: ${graphPoint/id}
+              usedBlocks:
+                sequence: 1
+                dpName: usedBlocks_usedBlocks
+                lineType: AREA
+                format: '%6.2lf%%'
+                legend: Used
+                rpn: ${here/totalBlocks},/,100,*
+      CheckPointDevice:
+        description: Device metrics for Check Point firewalls.
+        targetPythonClass: Products.ZenModel.Device  # ??
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            eventClass: /Cmd/Fail
+          diskPercent:
+            # Percent of free space.
+            oid: 1.3.6.1.4.1.2620.1.6.7.3.3.0
+            datapoints:
+              diskPercent:
+                rrdmax: 100
+                aliases: {fs__pct}
+          dtpsConnectedUsers:
+            # Connected users.
+            oid: 1.3.6.1.4.1.2620.1.9.5.0
+            datapoints:
+              dtpsConnectedUsers: {}
+          dtpsState:
+            # Connected users.
+            type: COMMAND
+            component: policy server
+            eventClass: /Status/VPN
+            severity: 4
+            commandTemplate: check_checkPointDtpsState.py -H ${here/manageIp} -c '${here/zSnmpCommunity}' -v ${here/zSnmpVer} -p ${here/zSnmpPort} -t ${here/zSnmpTimeout} -u '${here/zSnmpSecurityName}' -a '${here/zSnmpAuthType}' -A '${here/zSnmpAuthPassword}' -x '${here/zSnmpPrivType}' -X '${here/zSnmpPrivPassword}'
+            cycletime: 60
+          fwAccepted:
+            # The number of accepted packets.
+            oid: 1.3.6.1.4.1.2620.1.1.4.0
+            datapoints:
+              fwAccepted:
+                rrdtype: DERIVE
+          fwDropped:
+            # The number of dropped packets.
+            oid: 1.3.6.1.4.1.2620.1.1.6.0
+            datapoints:
+              fwDropped:
+                rrdtype: DERIVE
+          fwLogged:
+            # The number of logged packets.
+            oid: 1.3.6.1.4.1.2620.1.1.7.0
+            datapoints:
+              fwLogged:
+                rrdtype: DERIVE
+          fwNumConn:
+            # Number of connections.
+            oid: 1.3.6.1.4.1.2620.1.1.25.3.0
+            datapoints:
+              fwNumConn: {}
+          fwPeakNumConn:
+            # Peak number of connections.
+            oid: 1.3.6.1.4.1.2620.1.1.25.4.0
+            datapoints:
+              fwPeakNumConn: {}
+          fwRejected:
+            # The number of rejected packets.
+            oid: 1.3.6.1.4.1.2620.1.1.5.0
+            datapoints:
+              fwRejected:
+                rrdtype: DERIVE
+          fwState:
+            type: COMMAND
+            component: firewall
+            eventClass: /Security
+            severity: 5
+            commandTemplate: check_checkPointFwState.py -H ${here/manageIp} -c '${here/zSnmpCommunity}' -v ${here/zSnmpVer} -p ${here/zSnmpPort} -t ${here/zSnmpTimeout} -u '${here/zSnmpSecurityName}' -a '${here/zSnmpAuthType}' -A '${here/zSnmpAuthPassword}' -x '${here/zSnmpPrivType}' -X '${here/zSnmpPrivPassword}'
+            cycletime: 60
+          haState:
+            type: COMMAND
+            component: HA
+            eventClass: /Status/HA
+            severity: 4
+            commandTemplate: check_checkPointHaState.py -H ${here/manageIp} -c '${here/zSnmpCommunity}' -v ${here/zSnmpVer} -p ${here/zSnmpPort} -t ${here/zSnmpTimeout} -u '${here/zSnmpSecurityName}' -a '${here/zSnmpAuthType}' -A '${here/zSnmpAuthPassword}' -x '${here/zSnmpPrivType}' -X '${here/zSnmpPrivPassword}'
+            cycletime: 60
+          memActiveReal:
+            # Active real memory (32 bit)
+            oid: 1.3.6.1.4.1.2620.1.6.7.1.4.0
+            datapoints:
+              memActiveReal:
+                aliases: {
+                  mem__pct: '${here/hw/totalMemory},/,100,*',
+                  memoryAvailable__bytes: '${here/hw/totalMemory},EXC,-',
+                  memoryUsed__pct: '${here/hw/totalMemory},/,100,*'
+                }
+          memActiveVirtual:
+            # Active virtual memory (32 bit)
+            oid: 1.3.6.1.4.1.2620.1.6.7.1.2.0
+            datapoints:
+              memActiveVirtual: {}
+          procSysTime:
+            # Processor system time.
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.2.0
+            datapoints:
+              procSysTime:
+                rrdmax: 100
+          procUsage:
+            # Processor usage.
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.4.0
+            datapoints:
+              procUsage:
+                rrdmax: 100
+                aliases: {cpu__pct}
+          procUsrTime:
+            # Processor user time.
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.1.0
+            datapoints:
+              procUsrTime:
+                rrdmax: 100
+        thresholds:
+          DEFAULTS:
+            escalateCount: 0
+          CPU utilization:
+            # This threshold monitors the value for the procUsage_procUsage DataPoint and when the value for gets above the default percentage value of 95 an event is sent.
+            eventClass: /Perf/CPU
+            dsnames: [procUsage_procUsage]
+            maxval: 95
+          disk utilization:
+            # This threshold monitors the value for the diskPercent_diskPercent DataPoint and when the value is above the default percentage value of 95 an event is sent.
+            eventClass: /Perf/Filesystem
+            dsnames: [diskPercent_diskPercent]
+            maxval: 95
+          licensed users:
+            # This threshold monitors the value for the dtpsConnectedUsers_dtpsConnectedUsers DataPoint and when the value gets above the default percentage value an event is sent.
+            eventClass: /License
+            dsnames: [dtpsConnectedUsers_dtpsConnectedUsers]
+            maxval: max(0, (here.dtpsLicensedUsers or 0) - 5)
+          memory utilization:
+            # This threshold monitors the value for the memActiveReal_memActiveReal DataPoint and when the value gets above the default percentage value of 90 an event is sent.
+            eventClass: /Perf/Memory
+            dsnames: [memActiveReal_memActiveReal]
+            maxval: here.hw.totalMemory * .9
+          swap utilization:
+            # This threshold monitors the value for the memActiveVirtual_memActiveVirtual DataPoint and when the value gets above the default percentage value of 50 an event is sent.
+            eventClass: /Perf/Memory
+            dsnames: [memActiveVirtual_memActiveVirtual]
+            maxval: here.os.totalSwap * .5
+        graphs:
+          DEFAULTS:
+            height: 100
+            miny: 0
+          CPU Utilization:
+            units: percent
+            miny: 0
+            maxy: 100
+            sequence: 0
+            graphpoints:
+              CPU utilization:
+                sequence: 0
+                type: ThresholdGraphPoint
+                threshId: CPU utilization
+                legend: ${graphPoint/id}
+              procSysTime:
+                sequence: 1
+                lineType: AREA
+                stacked: true
+                format: '%5.1lf%%'
+                legend: System
+                dpName: procSysTime_procSysTime
+              procUsrTime:
+                sequence: 2
+                lineType: AREA
+                stacked: true
+                format: '%5.1lf%%'
+                legend: User
+                dpName: procUsrTime_procUsrTime
+          Disk Utilization:
+            units: percent
+            maxy: 100
+            sequence: 2
+            graphpoints:
+              disk utilization:
+                sequence: 0
+                type: ThresholdGraphPoint
+                threshId: disk utilization
+                legend: ${graphPoint/id}
+              diskPercent:
+                sequence: 1
+                lineType: AREA
+                format: '%5.1lf%%'
+                legend: Used
+                dpName: diskPercent_diskPercent
+          Firewall - Packet Handling:
+            DEFAULTS:
+              lineType: AREA
+              stacked: true
+              format: '%5.2lf%s'
+            units: packets/sec
+            sequence: 4
+            graphpoints:
+              fwAccepted:
+                sequence: 0
+                legend: Accepted
+                dpName: fwAccepted_fwAccepted
+              fwDropped:
+                sequence: 2
+                legend: Dropped
+                dpName: fwDropped_fwDropped
+              fwLogged:
+                sequence: 3
+                legend: Logged
+                dpName: fwLogged_fwLogged
+              fwRejected:
+                sequence: 1
+                legend: Rejected
+                dpName: fwRejected_fwRejected
+          Firewall - Simultaneous Connections:
+            DEFAULTS:
+              format: '%6.0lf'
+            units: connections
+            sequence: 3
+            graphpoints:
+              fwNumConn:
+                sequence: 0
+                lineType: AREA
+                legend: Active
+                dpName: fwNumConn_fwNumConn
+              fwPeakNumConn:
+                sequence: 1
+                legend: Peak
+                dpName: fwPeakNumConn_fwPeakNumConn
+          Memory Utilization:
+            units: percent
+            maxy: 100
+            sequence: 1
+            graphpoints:
+              memActiveReal:
+                sequence: 2
+                lineType: AREA
+                format: '%5.1lf%%'
+                legend: Memory
+                rpn: ${here/hw/totalMemory},/,100,*
+                dpName: memActiveReal_memActiveReal
+              memActiveVirtual:
+                sequence: 3
+                lineWidth: 2
+                format: '%5.1lf%%'
+                legend: Swap
+                rpn: ${here/os/totalSwap},/,100,*
+                dpName: memActiveVirtual_memActiveVirtual
+              memory utilization:
+                sequence: 1
+                type: ThresholdGraphPoint
+                threshId: memory utilization
+                legend: ${graphPoint/id}
+              swap utilization:
+                sequence: 0
+                type: ThresholdGraphPoint
+                threshId: swap utilization
+                legend: ${graphPoint/id}
+          Policy Server - Users:
+            units: users
+            sequence: 5
+            graphpoints:
+              dtpsConnectedUsers:
+                sequence: 1
+                lineType: AREA
+                format: '%5.0lf'
+                legend: Connected
+                dpName: dtpsConnectedUsers_dtpsConnectedUsers
+              licensed users:
+                sequence: 0
+                type: ThresholdGraphPoint
+                threshId: licensed users
+                legend: ${graphPoint/id}
+
+  /Network/Check Point/Gaia:
+    zProperties:
+      zCollectorPlugins:
+        - zenoss.snmp.CpuMap
+        - zenoss.snmp.DeviceMap
+        - zenoss.snmp.HRFileSystemMap
+        - zenoss.snmp.HRSWRunMap
+        - zenoss.snmp.InterfaceMap
+        - zenoss.snmp.IpServiceMap
+        - zenoss.snmp.NewDeviceMap
+        - CheckPoint.DeviceMap
+
+  /Network/Check Point/SPLAT:
+    zProperties:
+      zCollectorPlugins:
+        - zenoss.snmp.CpuMap
+        - zenoss.snmp.DeviceMap
+        - zenoss.snmp.HRFileSystemMap
+        - zenoss.snmp.HRSWInstalledMap
+        - zenoss.snmp.HRSWRunMap
+        - zenoss.snmp.InterfaceMap
+        - zenoss.snmp.IpServiceMap
+        - zenoss.snmp.NewDeviceMap
+        - zenoss.snmp.RouteMap
+        - zenoss.snmp.UCDHardDiskMap
+        - CheckPoint.DeviceMap
+
+event_classes:
+  /Status/HA:
+    remove: true
+  /Status/VPN:
+    remove: true
