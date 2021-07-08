@@ -44,7 +44,6 @@ device_classes:
             escalateCount: 0
         graphs:
           Utilization:
-#            sequence: 0
             height: 100
             units: percentage
             miny: 0
@@ -268,28 +267,24 @@ device_classes:
                 dpName: fwAccepted_fwAccepted
                 lineType: AREA
                 stacked: true
-                format: '%5.2lf%s'
               fwDropped:
                 sequence: 2
                 legend: Dropped
                 dpName: fwDropped_fwDropped
                 lineType: AREA
                 stacked: true
-                format: '%5.2lf%s'
               fwLogged:
                 sequence: 3
                 legend: Logged
                 dpName: fwLogged_fwLogged
                 lineType: AREA
                 stacked: true
-                format: '%5.2lf%s'
               fwRejected:
                 sequence: 1
                 legend: Rejected
                 dpName: fwRejected_fwRejected
                 lineType: AREA
                 stacked: true
-                format: '%5.2lf%s'
           Firewall - Simultaneous Connections:
             units: connections
             graphpoints:
