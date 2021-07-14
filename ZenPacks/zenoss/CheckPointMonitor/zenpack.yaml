@@ -1,5 +1,53 @@
 name: ZenPacks.zenoss.CheckPointMonitor
 
+classes:
+
+    CheckPointDevice:
+        base: [zenpacklib.Device]
+        label: Check Point Firewall
+        properties:
+            fwModuleState:
+                type: string
+                default: ""
+
+            fwVerMajor: {}
+            fwVerMinor: {}
+            fwPolicyName:
+                default: ""
+            fwInstallTime:
+                default: ""
+
+            cpvVerMajor: {}
+            cpvVerMinor: {}
+
+            haInstalled: {}
+            haVerMajor: {}
+            haVerMinor: {}
+            haStarted: {}
+            haState:
+                default: ""
+
+            memTotalReal:
+                type: int
+            memTotalVirtual:
+                type: int
+
+            svnVersion:
+                default: ""
+
+            osName:
+                default: ""
+            osMajorVer:
+                type: int
+            osMinorVer:
+                type: int
+            osVersionLevel:
+                default: ""
+
+            dtpsVerMajor: {}
+            dtpsVerMinor: {}
+            dtpsLicensedUsers: {}
+
 device_classes:
   DEFAULTS:
     remove: true
