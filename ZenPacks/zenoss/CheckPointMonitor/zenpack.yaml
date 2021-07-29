@@ -1,52 +1,51 @@
 name: ZenPacks.zenoss.CheckPointMonitor
 
 classes:
+  CheckPointDevice:
+    base: [zenpacklib.Device]
+    label: Check Point Firewall
+    properties:
+      fwModuleState:
+        type: string
+        default: ""
 
-    CheckPointDevice:
-        base: [zenpacklib.Device]
-        label: Check Point Firewall
-        properties:
-            fwModuleState:
-                type: string
-                default: ""
+      fwVerMajor: {}
+      fwVerMinor: {}
+      fwPolicyName:
+        default: ""
+      fwInstallTime:
+        default: ""
 
-            fwVerMajor: {}
-            fwVerMinor: {}
-            fwPolicyName:
-                default: ""
-            fwInstallTime:
-                default: ""
+      cpvVerMajor: {}
+      cpvVerMinor: {}
 
-            cpvVerMajor: {}
-            cpvVerMinor: {}
+      haInstalled: {}
+      haVerMajor: {}
+      haVerMinor: {}
+      haStarted: {}
+      haState:
+        default: ""
 
-            haInstalled: {}
-            haVerMajor: {}
-            haVerMinor: {}
-            haStarted: {}
-            haState:
-                default: ""
+      memTotalReal:
+        type: int
+      memTotalVirtual:
+        type: int
 
-            memTotalReal:
-                type: int
-            memTotalVirtual:
-                type: int
+      svnVersion:
+        default: ""
 
-            svnVersion:
-                default: ""
+      osName:
+        default: ""
+      osMajorVer:
+        type: int
+      osMinorVer:
+        type: int
+      osVersionLevel:
+        default: ""
 
-            osName:
-                default: ""
-            osMajorVer:
-                type: int
-            osMinorVer:
-                type: int
-            osVersionLevel:
-                default: ""
-
-            dtpsVerMajor: {}
-            dtpsVerMinor: {}
-            dtpsLicensedUsers: {}
+      dtpsVerMajor: {}
+      dtpsVerMinor: {}
+      dtpsLicensedUsers: {}
 
 device_classes:
   DEFAULTS:
@@ -135,13 +134,16 @@ device_classes:
             datapoints:
               dtpsConnectedUsers: {}
           dtpsState:
-            # Connected users.
-            type: COMMAND
-            component: policy server
+            # Checks to verify that the policy server (for SecureClient) is running.
+            type: SNMP String Status DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.SnmpStringStatusDataSource.SnmpStringStatusDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.9.102.0
             eventClass: /Status/VPN
-            severity: 4
-            commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.CheckPointMonitor/path}/libexec/check_checkPointDtpsState.py -H ${here/manageIp} -c '${here/zSnmpCommunity}' -v ${here/zSnmpVer} -p ${here/zSnmpPort} -t ${here/zSnmpTimeout} -u '${here/zSnmpSecurityName}' -a '${here/zSnmpAuthType}' -A '${here/zSnmpAuthPassword}' -x '${here/zSnmpPrivType}' -X '${here/zSnmpPrivPassword}'
+            severity: 2
             cycletime: 60
+            resultSeverityMap:
+              'Down': 4
+              'down': 4
           fwAccepted:
             # The number of accepted packets.
             plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
@@ -183,19 +185,29 @@ device_classes:
               fwRejected:
                 rrdtype: DERIVE
           fwState:
-            type: COMMAND
-            component: firewall
-            eventClass: /Security
+            # Checks to verify that the firewall module currently has a policy installed.
+            type: SNMP String Status DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.SnmpStringStatusDataSource.SnmpStringStatusDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.1.1.0
+            eventClass: /Status/Firewall
             severity: 5
-            commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.CheckPointMonitor/path}/libexec/check_checkPointFwState.py -H ${here/manageIp} -c '${here/zSnmpCommunity}' -v ${here/zSnmpVer} -p ${here/zSnmpPort} -t ${here/zSnmpTimeout} -u '${here/zSnmpSecurityName}' -a '${here/zSnmpAuthType}' -A '${here/zSnmpAuthPassword}' -x '${here/zSnmpPrivType}' -X '${here/zSnmpPrivPassword}'
             cycletime: 60
+            resultSeverityMap:
+              'Installed': 2
+              'installed': 2
           haState:
-            type: COMMAND
-            component: HA
+            # Checks to verify that HA is in a proper state.
+            type: SNMP String Status DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.SnmpStringStatusDataSource.SnmpStringStatusDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.5.6.0
             eventClass: /Status/HA
             severity: 4
-            commandTemplate: ${here/ZenPackManager/packs/ZenPacks.zenoss.CheckPointMonitor/path}/libexec/check_checkPointHaState.py -H ${here/manageIp} -c '${here/zSnmpCommunity}' -v ${here/zSnmpVer} -p ${here/zSnmpPort} -t ${here/zSnmpTimeout} -u '${here/zSnmpSecurityName}' -a '${here/zSnmpAuthType}' -A '${here/zSnmpAuthPassword}' -x '${here/zSnmpPrivType}' -X '${here/zSnmpPrivPassword}'
             cycletime: 60
+            resultSeverityMap:
+              'active': 2
+              'standby': 2
+              'stand-by': 2
+              'not active': 4
           memActiveReal:
             # Active real memory (32 bit)
             plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
@@ -418,5 +430,24 @@ device_classes:
         - CheckPoint.DeviceMap
 
 event_classes:
-  /Status/HA: {}
-  /Status/VPN: {}
+  /Status/HA:
+    transform: |-
+      import re
+      component = 'HA'
+      summary = evt.summary
+      evt.component = component
+      evt.summary = re.sub('haState', component, summary)
+  /Status/VPN:
+    transform: |-
+      import re
+      component = 'policy server'
+      summary = evt.summary
+      evt.component = component
+      evt.summary = re.sub('dtpsState', component, summary)
+  /Status/Firewall:
+    transform: |-
+      import re
+      component = 'firewall'
+      summary = evt.summary
+      evt.component = component
+      evt.summary = re.sub('fwState', component, summary)
