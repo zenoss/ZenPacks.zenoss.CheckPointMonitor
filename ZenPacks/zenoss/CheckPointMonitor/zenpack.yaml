@@ -47,6 +47,21 @@ classes:
       dtpsVerMinor: {}
       dtpsLicensedUsers: {}
 
+  VsxDevice:
+    base: [ zenpacklib.Component ]
+    label: VSX Device
+    properties:
+      vsType:
+        label: VS Type
+      vsMainIP:
+        label: Main IP
+      vsPolicyName:
+        label: Policy Name
+      vsPolicyType:
+        label: Policy Type
+      vsHAState:
+        label: HA State
+
 device_classes:
   DEFAULTS:
     remove: true
@@ -430,6 +445,18 @@ device_classes:
         - zenoss.snmp.RouteMap
         - zenoss.snmp.UCDHardDiskMap
         - CheckPoint.DeviceMap
+
+  /Network/Check Point/VSX/Gateway:
+    zProperties:
+      zPythonClass: ZenPacks.zenoss.CheckPointMonitor.CheckPointDevice
+      zCollectorPlugins:
+        - CheckPoint.DeviceMap
+        - CheckPoint.snmp.VsxDevice
+
+  /Network/Check Point/VSX/Device: {}
+
+class_relationships:
+  - CheckPointDevice 1:MC VsxDevice
 
 event_classes:
   /Status/HA:

@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2008, 2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2008, 2014, 2021 all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -18,6 +18,8 @@ from zenoss.protocols.protobufs.zep_pb2 import (
     )
 
 from . import schema as schema
+from .jobs import VsxDeviceJob
+
 
 
 class CheckPointDevice(schema.CheckPointDevice):
@@ -107,4 +109,18 @@ class CheckPointDevice(schema.CheckPointDevice):
             offset=0, limit=0, filter=event_filter)
 
         return summaries['total']
+
+    def setDevices(self, vsxDevices):
+        """
+        Creates managed devices under /Network/Check Point/VSX/Device device class.
+        """
+        if vsxDevices:
+            self.dmd.JobManager.addJob(
+                VsxDeviceJob,
+                description="Creating virtual devices for VSX Gateway %s" % self.id,
+                kwargs={
+                    "vsxGatewayID": self.id,
+                    "vsxDevices": vsxDevices,
+                }
+            )
 
