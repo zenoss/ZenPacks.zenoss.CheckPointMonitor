@@ -56,11 +56,11 @@ class VsxDevice(PythonSnmpModeler):
                     'vsMainIP': row.get('vsxStatusMainIP'),
                     'vsPolicyName': row.get('vsxStatusPolicyName'),
                     'vsPolicyType': row.get('vsxStatusVsPolicyType'),
-                    'vsHAState': row.get('vsxStatusHAState')
+                    'vsHAState': row.get('vsxStatusHAState')  # should be monitored
                 }
 
-                rm.append(self.objectMap(devDict.update({'id': self.prepId('vsxdev_%s' % vsxID)})))
-                setDevices[vsxName] = devDict.update({'id': self.prepId('vsxdiscovered_%s' % vsxID)})
+                rm.append(self.objectMap(dict(devDict, **{'id': self.prepId('vsxdev_%s' % vsxID)})))
+                setDevices[vsxName] = dict(devDict, **{'id': self.prepId('vsxdiscovered_%s' % vsxID)})
 
         # discovered devices
         gatewayOm = ObjectMap()

@@ -1,5 +1,13 @@
 name: ZenPacks.zenoss.CheckPointMonitor
 
+zProperties:
+  zVsxCreateDevices:
+    type: boolean
+    default: true
+  zVsxRemoveDevices:
+    type: boolean
+    default: true
+
 classes:
   CheckPointDevice:
     base: [zenpacklib.Device]
@@ -47,6 +55,22 @@ classes:
       dtpsVerMinor: {}
       dtpsLicensedUsers: {}
 
+  VirtualDevice:
+    base: [zenpacklib.Device]
+    label: Check Point VSX Device
+    properties:
+      devType:
+        label: VS Type
+      devMainIP:
+        label: Main IP
+      devPolicyName:
+        label: Policy Name
+      devPolicyType:
+        label: Policy Type
+      devHAState:
+        # should be monitored
+        label: HA State
+
   VsxDevice:
     base: [ zenpacklib.Component ]
     label: VSX Device
@@ -60,6 +84,7 @@ classes:
       vsPolicyType:
         label: Policy Type
       vsHAState:
+        # should be monitored
         label: HA State
 
 device_classes:
@@ -453,7 +478,10 @@ device_classes:
         - CheckPoint.DeviceMap
         - CheckPoint.snmp.VsxDevice
 
-  /Network/Check Point/VSX/Device: {}
+  /Network/Check Point/VSX/Device:
+    remove: true
+    zProperties:
+      zPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
 
 class_relationships:
   - CheckPointDevice 1:MC VsxDevice
