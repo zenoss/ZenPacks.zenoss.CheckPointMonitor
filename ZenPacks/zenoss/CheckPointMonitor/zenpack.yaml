@@ -55,7 +55,11 @@ classes:
       dtpsVerMinor: {}
       dtpsLicensedUsers: {}
 
-  VirtualDevice:
+  GatewayDevice:
+    base: [CheckPointDevice]
+    label: VSX Gateway
+
+  VirtualDevice:  # rename -> GatewayDevice or VSXGateway?
     base: [zenpacklib.Device]
     label: Check Point VSX Device
     properties:
@@ -70,6 +74,10 @@ classes:
       devHAState:
         # should be monitored
         label: HA State
+      devId:
+        label: VS Id
+      devGatewayIp:
+        label: VSX Gateway IP
 
   VsxDevice:
     base: [ zenpacklib.Component ]
@@ -86,6 +94,62 @@ classes:
       vsHAState:
         # should be monitored
         label: HA State
+      vsId:
+        label: VS Id
+
+  VsxRAIDVolume:
+    base: [ zenpacklib.Component ]
+    label: VSX RAID Volume
+    properties:
+      raidVolumeIndex:
+        label: Volume Index
+      raidVolumeID:
+        label: Volume ID
+        grid_display: False
+      raidVolumeType:
+        label: Volume Type
+      numOfDisksOnRaid:
+        label: Number Of Disks on the RAID
+        grid_display: False
+      raidVolumeMaxLBA:
+        label: Raid maximum number of Logical Block Addressing
+        grid_display: False
+      raidVolumeState:
+        label: Volume State  # to monitor
+      raidVolumeFlags:
+        label: Volume Flags  # monitor/model?
+      raidVolumeSize:
+        label: Volume Size
+
+  VsxRAIDDisk:
+    base: [ zenpacklib.Component ]
+    label: VSX RAID Disk
+    properties:
+      raidDiskIndex:
+        label: RAID Disk Index
+      raidDiskVolumeID:
+        label: RAID Disk Volume ID
+      raidDiskID:
+        label: raid Disk ID
+      raidDiskNumber:
+        label: raid Disk Number
+      raidDiskVendor:
+        label: raid Disk Vendor
+      raidDiskProductID:
+        label: raid Disk Product ID
+      raidDiskRevision:
+        label: raid Disk Revision
+      raidDiskMaxLBA:
+        label: Raid disk maximum number of Logical Block Addressing
+        grid_display: False
+      raidDiskState:
+        label: raid Disk State  # monitor
+      raidDiskFlags:
+        label: raid Disk Flags  # monitor/model?
+      raidDiskSyncState:
+        label: raid Disk State  # monitor/model?
+      raidDiskSize:
+        label: raid Disk Size
 
 device_classes:
   DEFAULTS:
@@ -106,6 +170,7 @@ device_classes:
       zDeviceTemplates:
         - Device
         - CheckPointDevice
+        - GatewayDevice
     templates:
       FileSystem:
         description: Filesystem template that uses HOST-RESOURCES mib. Has 95% threshold
@@ -473,10 +538,117 @@ device_classes:
 
   /Network/Check Point/VSX/Gateway:
     zProperties:
-      zPythonClass: ZenPacks.zenoss.CheckPointMonitor.CheckPointDevice
+      zPythonClass: ZenPacks.zenoss.CheckPointMonitor.GatewayDevice
       zCollectorPlugins:
         - CheckPoint.DeviceMap
         - CheckPoint.snmp.VsxDevice
+      zDeviceTemplates:
+        - Device
+        - GatewayDevice
+    templates:
+      GatewayDevice:
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.GatewayDeviceq
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+          # Memory
+          memTotalReal64:
+            # Total real memory in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.4.3.0
+            datapoints:
+              memTotalReal64: {}
+          memActiveReal64:
+            # Active real memory in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.4.4.0
+            datapoints:
+              memActiveReal64: {}
+          memFreeReal64:
+            # Free memory in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.4.5.0
+            datapoints:
+              memFreeReal64: {}
+          memTotalVirtual64:
+            # Total virtual memory in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.4.1.0
+            datapoints:
+              memTotalVirtual64: {}
+          memActiveVirtual64:
+            # Active virtual memory in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.4.2.0
+            datapoints:
+              memActiveVirtual64: {}
+          # CPU
+          procUsage:
+            # Percentage of CPU utilization - Overall
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.4.0
+            datapoints:
+              procUsage: {}
+          procUsrTime:
+            # Percentage of CPU utilization for user mode processes - Overall
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.1.0
+            datapoints:
+              procUsrTime: {}
+          procSysTime:
+            # Percentage of CPU utilization for kernel mode processes - Overall
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.2.0
+            datapoints:
+              procSysTime: {}
+          procIdleTime:
+            # Percentage of CPU idle time - Overall
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.3.0
+            datapoints:
+              procIdleTime: {}
+          procInterrupts:
+            # Number of CPU interrupts per second - Overall
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.6.0
+            datapoints:
+              procInterrupts: {}
+          procNum:
+            # Number of machine CPU cores
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.7.0
+            datapoints:
+              procNum: {}
+          # Disk
+          diskPercent:
+            # Percent of free space
+            oid: 1.3.6.1.4.1.2620.1.6.7.3.3.0
+            datapoints:
+              diskPercent: {}
+          diskFreeTotal:
+            # Disk total free space
+            oid: 1.3.6.1.4.1.2620.1.6.7.3.4.0
+            datapoints:
+              diskFreeTotal: {}
+          diskFreeAvail:
+            # Disk available free space
+            oid: 1.3.6.1.4.1.2620.1.6.7.3.5.0
+            datapoints:
+              diskFreeAvail: {}
+          diskTotal:
+            # Disk total space
+            oid: 1.3.6.1.4.1.2620.1.6.7.3.6.0
+            datapoints:
+              diskTotal: {}
+        graphs:
+          Memory TEST:
+            units: bytes
+            graphpoints:
+              memActiveReal64:
+                legend: Active real
+                dpName: memActiveReal64_memActiveReal64
+              memFreeReal64:
+                legend: Free real
+                dpName: memFreeReal64_memFreeReal64
+              memTotalReal64:
+                legend: Total real
+                dpName: memTotalReal64_memTotalReal64
+              memActiveVirtual64:
+                legend: Active virtual
+                dpName: memActiveVirtual64_memActiveVirtual64
+              memTotalVirtual64:
+                legend: Total virtual
+                dpName: memTotalVirtual64_memTotalVirtual64
 
   /Network/Check Point/VSX/Device:
     remove: true
@@ -484,7 +656,9 @@ device_classes:
       zPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
 
 class_relationships:
-  - CheckPointDevice 1:MC VsxDevice
+  - GatewayDevice 1:MC VsxDevice
+  - GatewayDevice 1:MC VsxRAIDVolume
+  - VsxRAIDVolume 1:M VsxRAIDDisk
 
 event_classes:
   /Status/HA:
