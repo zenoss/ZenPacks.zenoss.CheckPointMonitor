@@ -99,57 +99,117 @@ classes:
 
   VsxRAIDVolume:
     base: [ zenpacklib.Component ]
-    label: VSX RAID Volume
+    label: RAID Volume
     properties:
       raidVolumeIndex:
         label: Volume Index
+        grid_display: False
       raidVolumeID:
         label: Volume ID
         grid_display: False
       raidVolumeType:
-        label: Volume Type
+        label: Type
       numOfDisksOnRaid:
         label: Number Of Disks on the RAID
         grid_display: False
       raidVolumeMaxLBA:
         label: Raid maximum number of Logical Block Addressing
         grid_display: False
-      raidVolumeState:
-        label: Volume State  # to monitor
-      raidVolumeFlags:
-        label: Volume Flags  # monitor/model?
       raidVolumeSize:
-        label: Volume Size
+        label: Size
+      raidVolumeState:
+        label: Volume State
+        datapoint: raidVolumeState_raidVolumeState
+        enum:
+          0: "OPTIMAL"
+          1: "DEGRADED"
+          2: "FAILED"
+          3: "UNKNOWN"
+        datapoint_default: 3
+      raidVolumeFlags:
+        label: Volume Flags
+        datapoint: raidVolumeFlags_raidVolumeFlags
+        enum:
+          1: "ENABLED"
+          2: "QUIESCED"
+          4: "RESYNC_IN_PROGRESS"
+          8: "VOLUME_INACTIVE"
+          16: "NOT_CONFIGURED"
+          32: "USING_INTERIM_RECOVERY_MODE"
+          64: "READY_FOR_RECOVERY_OPERATION"
+          128: "WRONG_PHYSICAL_DRIVE_WAS_REPLACED"
+          256: "A_PHYSICAL_DRIVE_IS_NOT_PROPERLY_CONNECTED"
+          512: "HARDWARE_IS_OVER_HEATING"
+          1024: "HARDWARE_WAS_OVERHEATED"
+          2048: "CURRENTLY_EXPENDING"
+          4096: "NOT_YET_AVAILABLE"
+          8192: "QUEUED_FOR_EXPENSION"
+          16384: "MIGRATING"
+          32768: "IMPACTED"
+          65536: "OFFLINE"
+          131072: "CLEARING"
+          0: "NONE"
+        datapoint_default: 0
+    monitoring_templates:
+      - vsxRAIDVolumeTemplate
 
   VsxRAIDDisk:
     base: [ zenpacklib.Component ]
-    label: VSX RAID Disk
+    label: RAID Disk
     properties:
       raidDiskIndex:
-        label: RAID Disk Index
-      raidDiskVolumeID:
-        label: RAID Disk Volume ID
-      raidDiskID:
-        label: raid Disk ID
-      raidDiskNumber:
-        label: raid Disk Number
-      raidDiskVendor:
-        label: raid Disk Vendor
-      raidDiskProductID:
-        label: raid Disk Product ID
-      raidDiskRevision:
-        label: raid Disk Revision
-      raidDiskMaxLBA:
-        label: Raid disk maximum number of Logical Block Addressing
+        label: Disk Index
         grid_display: False
-      raidDiskState:
-        label: raid Disk State  # monitor
-      raidDiskFlags:
-        label: raid Disk Flags  # monitor/model?
-      raidDiskSyncState:
-        label: raid Disk State  # monitor/model?
+      raidDiskID:
+        label: Disk ID
+        grid_display: False
+      raidDiskNumber:
+        label: Disk Number
+      raidDiskVendor:
+        label: Vendor
+      raidDiskProductID:
+        label: Product ID
+      raidDiskRevision:
+        label: Revision
+      raidDiskMaxLBA:
+        label: Disk maximum number of Logical Block Addressing
+        grid_display: False
       raidDiskSize:
-        label: raid Disk Size
+        label: Size
+      raidDiskState:
+        label: Disk State
+        datapoint: raidDiskState_raidDiskState
+        enum:
+          0: "ONLINE"
+          1: "MISSING"
+          2: "NOT_COMPATIBLE"
+          3: "DISC_FAILED"
+          4: "INITIALIZING"
+          5: "OFFLINE_REQUESTED"
+          6: "FAILED_REQUESTED"
+          7: "UNCONFIGURED_GOOD_SPUN_UP"
+          8: "UNCONFIGURED_GOOD_SPUN_DOWN"
+          9: "UNCONFIGURED_BAD"
+          10: "HOTSPARE"
+          11: "DRIVE_OFFLINE"
+          12: "REBUILD"
+          13: "FAILED"
+          15: "COPYBACK"
+          255: "OTHER_OFFLINE"
+          100: "UNKNOWN"
+        datapoint_default: 100
+      raidDiskFlags:
+        label: Disk Flags
+        datapoint: raidDiskState_raidDiskState
+        enum:
+          1: "OUT_OF_SYNC"
+          2: "QUIESCED"
+          4: "VERIFYING"
+          8: "READY"
+          0: "NONE"
+        datapoint_default: 0
+    monitoring_templates:
+      - vsxRAIDDiskTemplate
 
 device_classes:
   DEFAULTS:
@@ -542,17 +602,18 @@ device_classes:
       zCollectorPlugins:
         - CheckPoint.DeviceMap
         - CheckPoint.snmp.VsxDevice
+        - CheckPoint.snmp.VsxRAID
       zDeviceTemplates:
         - Device
         - GatewayDevice
     templates:
       GatewayDevice:
-        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.GatewayDeviceq
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.GatewayDevice
         datasources:
           DEFAULTS:
             type: Python SNMP DataSource
             plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
-          # Memory
+          ### Memory ###
           memTotalReal64:
             # Total real memory in bytes
             oid: 1.3.6.1.4.1.2620.1.6.7.4.3.0
@@ -578,7 +639,7 @@ device_classes:
             oid: 1.3.6.1.4.1.2620.1.6.7.4.2.0
             datapoints:
               memActiveVirtual64: {}
-          # CPU
+          ### CPU ###
           procUsage:
             # Percentage of CPU utilization - Overall
             oid: 1.3.6.1.4.1.2620.1.6.7.2.4.0
@@ -609,7 +670,7 @@ device_classes:
             oid: 1.3.6.1.4.1.2620.1.6.7.2.7.0
             datapoints:
               procNum: {}
-          # Disk
+          ### Disk ###
           diskPercent:
             # Percent of free space
             oid: 1.3.6.1.4.1.2620.1.6.7.3.3.0
@@ -631,7 +692,7 @@ device_classes:
             datapoints:
               diskTotal: {}
         graphs:
-          Memory TEST:
+          Memory:
             units: bytes
             graphpoints:
               memActiveReal64:
@@ -649,6 +710,62 @@ device_classes:
               memTotalVirtual64:
                 legend: Total virtual
                 dpName: memTotalVirtual64_memTotalVirtual64
+          Memory Utilization:
+            units: percent
+            maxy: 100
+            graphpoints:
+              memActiveRealUtil:
+                sequence: 2
+                lineType: AREA
+                format: '%5.1lf%%'
+                legend: Memory
+                rpn: memTotalReal64_memTotalReal64,/,100,*
+                dpName: memActiveReal64_memActiveReal64
+              memActiveVirtualUtil:
+                sequence: 3
+                lineWidth: 2
+                format: '%5.1lf%%'
+                legend: Swap
+                rpn: memTotalVirtual64_memTotalVirtual64,/,100,*
+                dpName: memActiveVirtual64_memActiveVirtual64
+
+      ### RAID Volume ###
+      vsxRAIDVolumeTemplate:
+        description: SNMP monitoring for VSX RAID Volume
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VsxRAIDVolume
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+          raidVolumeState:
+            # Raid state
+            oid: 1.3.6.1.4.1.2620.1.6.7.7.1.1.6
+            datapoints:
+              raidVolumeState: {}
+          raidVolumeFlags:
+            # Raid Volume Flags
+            oid: 1.3.6.1.4.1.2620.1.6.7.7.1.1.7
+            datapoints:
+              raidVolumeFlags: {}
+
+      ### RAID Disk ###
+      vsxRAIDDiskTemplate:
+        description: SNMP monitoring for VSX RAID Disk
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VsxRAIDDisk
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+          raidDiskState:
+            # Raid disk state
+            oid: 1.3.6.1.4.1.2620.1.6.7.7.2.1.9
+            datapoints:
+              raidDiskState: {}
+          raidDiskFlags:
+            # Raid disk flags
+            oid: 1.3.6.1.4.1.2620.1.6.7.7.2.1.10
+            datapoints:
+              raidDiskFlags: {}
 
   /Network/Check Point/VSX/Device:
     remove: true
@@ -658,7 +775,7 @@ device_classes:
 class_relationships:
   - GatewayDevice 1:MC VsxDevice
   - GatewayDevice 1:MC VsxRAIDVolume
-  - VsxRAIDVolume 1:M VsxRAIDDisk
+  - VsxRAIDVolume 1:MC VsxRAIDDisk
 
 event_classes:
   /Status/HA:

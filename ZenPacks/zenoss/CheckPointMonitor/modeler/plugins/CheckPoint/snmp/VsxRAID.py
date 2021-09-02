@@ -6,11 +6,13 @@
 # License.zenoss under the directory where your Zenoss product is installed.
 #
 ##############################################################################
+"""CheckPoint Monitor (VSX) modeler plugin for RAID Volume and RAID Disk components."""
 
 from Products.DataCollector.plugins.DataMaps import RelationshipMap, ObjectMap
 from Products.DataCollector.plugins.CollectorPlugin import GetTableMap, GetMap
 
 from ZenPacks.zenoss.PS.Util.python_snmp.PythonSnmpModeler import PythonSnmpModeler
+
 
 RAID_TYPE_DICT = {
     0: 'RAID-0',
@@ -31,7 +33,7 @@ RAID_DISK_NUMBER = {
 
 
 class VsxRAID(PythonSnmpModeler):
-    """TODO"""
+    """VsxRAID modeler plugin for RAID Volume and RAID Disk components."""
 
     modname = 'ZenPacks.zenoss.CheckPointMonitor.VsxRAIDVolume'
     relname = 'vsxRAIDVolumes'
@@ -44,8 +46,6 @@ class VsxRAID(PythonSnmpModeler):
                 '.1.3': 'raidVolumeType',
                 '.1.4': 'numOfDisksOnRaid',
                 '.1.5': 'raidVolumeMaxLBA',
-                '.1.6': 'raidVolumeState',  # to monitor
-                '.1.7': 'raidVolumeFlags',  # to monitor??
                 '.1.8': 'raidVolumeSize'
             },
         ),
@@ -59,9 +59,6 @@ class VsxRAID(PythonSnmpModeler):
                 '.1.6': 'raidDiskProductID',
                 '.1.7': 'raidDiskRevision',
                 '.1.8': 'raidDiskMaxLBA',
-                '.1.9': 'raidDiskState',  # to monitor
-                '.1.10': 'raidDiskFlags',  # to monitor??
-                '.1.11': 'raidDiskSyncState',  # to monitor??
                 '.1.12': 'raidDiskSize',
 
             },
@@ -71,6 +68,7 @@ class VsxRAID(PythonSnmpModeler):
 
 
     def process(self, device, results, log):
+        """Method for processing data collected from RAID Volume and RAID Disk components"""
 
         _, tabledata = results
         raidVolumeTable = tabledata.get('raidVolumeTable', {})
@@ -89,52 +87,63 @@ class VsxRAID(PythonSnmpModeler):
         return maps
 
     def processVolume(self, data):
+        """Method process() for RAID Volume components"""
+
         compnames = {}
-        rm = RelationshipMap(compname=self.compname, relname=self.relname, modname=self.modname)
-        for snmpindex, row in data.items():
-            om = self.objectMap({
-                'id': self.prepId('raidVolume_%s' % row.get('raidVolumeID')),
-                'raidVolumeIndex': row.get('raidVolumeIndex'),
-                'raidVolumeID': row.get('raidVolumeID'),
-                'raidVolumeType': RAID_TYPE_DICT.get(row.get('raidVolumeType')),
-                'numOfDisksOnRaid': row.get('numOfDisksOnRaid'),
-                'raidVolumeMaxLBA': row.get('raidVolumeMaxLBA'),
-                'raidVolumeSize': row.get('raidVolumeSize')
-            })
-            compnames[om.raidVolumeID] = "{}/{}".format(self.relname, om.id)
+        rm = self.relMap()
+
+        for snmpindex, volume in data.items():
+            om = self.objectMap({'id': self.prepId('raidVolume_{}'.format(volume.get('raidVolumeID'))),
+                                 'raidVolumeIndex': volume.get('raidVolumeIndex'),
+                                 'raidVolumeID': volume.get('raidVolumeID'),
+                                 'raidVolumeType': RAID_TYPE_DICT.get(volume.get('raidVolumeType')),
+                                 'numOfDisksOnRaid': volume.get('numOfDisksOnRaid'),
+                                 'raidVolumeMaxLBA': volume.get('raidVolumeMaxLBA'),
+                                 'raidVolumeSize': volume.get('raidVolumeSize'),
+                                 'snmpindex': snmpindex})
+
+            # compnames - used for building compname for disk component
+            compnames[om.raidVolumeID] = ("{}/{}".format(self.relname, om.id), om.id)
             rm.append(om)
         return rm, compnames
 
     def processDisk(self, data, volumeCompnames):
+        """Method process() for RAID Disk components"""
+
         modname = 'ZenPacks.zenoss.CheckPointMonitor.VsxRAIDDisk'
         relname = 'vsxRAIDDisks'
 
         maps = []
-
         sortedData = {}
-        for v in data.values():
-            index = v.get('raidDiskVolumeID')
-            if index in sortedData.keys():
-                sortedData[index].append(v)
+
+        # group data by 'raidDiskVolumeID' field
+        for snmpindex, disk in data.items():
+            volumeID = disk.get('raidDiskVolumeID')
+            if volumeID in sortedData:
+                sortedData[(volumeID, snmpindex)].append(disk)
             else:
-                sortedData[index] = [v]
+                sortedData[(volumeID, snmpindex)] = [disk]
 
-        for volumeID, raidDisks in sortedData.items():
-            compname = volumeCompnames[volumeID]
-            rm = RelationshipMap(compname=compname, relname=relname, modname=modname)
+        for (volumeID, snmpindex), raidDisks in sortedData.items():
+            compname, parentID = volumeCompnames.get(volumeID, ('', ''))
+            diskMaps = []
             for disk in raidDisks:
-                rm.append(self.objectMap({
-                        'id': self.prepId('raidDisk_%s' % disk.get('raidDiskID')),
-                        'raidDiskIndex': disk.get('raidDiskIndex'),
-                        'raidDiskNumber': RAID_DISK_NUMBER.get(disk.get('raidDiskNumber')),
-                        'raidDiskVendor': disk.get('raidDiskVendor'),
-                        'raidDiskProductID': disk.get('raidDiskProductID'),
-                        'raidDiskRevision': disk.get('raidDiskRevision'),
-                        'raidDiskMaxLBA': disk.get('raidDiskMaxLBA'),
-                        'raidDiskSize': disk.get('raidDiskSize')
-                    }))
+                diskMaps.append(ObjectMap(data={'id': self.prepId('{}_raidDisk_{}'.format(parentID, disk.get('raidDiskID'))),
+                                                'raidDiskIndex': disk.get('raidDiskIndex'),
+                                                'raidDiskID': disk.get('raidDiskID'),
+                                                'raidDiskNumber': RAID_DISK_NUMBER.get(disk.get('raidDiskNumber')),
+                                                'raidDiskVendor': disk.get('raidDiskVendor'),
+                                                'raidDiskProductID': disk.get('raidDiskProductID'),
+                                                'raidDiskRevision': disk.get('raidDiskRevision'),
+                                                'raidDiskMaxLBA': disk.get('raidDiskMaxLBA'),
+                                                'raidDiskSize': disk.get('raidDiskSize'),
+                                                'snmpindex': snmpindex}))
+
+            rm = RelationshipMap(compname=compname,
+                                 parentId=parentID,
+                                 relname=relname,
+                                 modname=modname,
+                                 objmaps=diskMaps)
             maps.append(rm)
+
         return maps
-
-
-
