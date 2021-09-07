@@ -6,6 +6,11 @@
 # License.zenoss under the directory where your Zenoss product is installed.
 #
 ##############################################################################
+"""
+CheckPoint Monitor (VSX) modeler plugin for VSX Device components.
+
+Uses CHECKPOINT-MIB
+"""
 
 from Products.DataCollector.plugins.DataMaps import RelationshipMap, ObjectMap
 from Products.DataCollector.plugins.CollectorPlugin import GetTableMap, GetMap
@@ -14,10 +19,15 @@ from ZenPacks.zenoss.PS.Util.python_snmp.PythonSnmpModeler import PythonSnmpMode
 
 
 class VsxDevice(PythonSnmpModeler):
-    """TODO"""
+    """VsxDevice modeler plugin for VSX Device components."""
 
     modname = 'ZenPacks.zenoss.CheckPointMonitor.VsxDevice'
     relname = 'vsxDevices'
+
+    snmpGetMap = GetMap({
+        '.1.3.6.1.4.1.2620.1.6.7.4.3.0': 'memTotalReal64',
+        '.1.3.6.1.4.1.2620.1.6.7.4.1.0': 'memTotalVirtual64',
+    })
 
     snmpGetTableMaps = (
         GetTableMap(
@@ -30,7 +40,6 @@ class VsxDevice(PythonSnmpModeler):
                 '.1.6': 'vsxStatusPolicyName',
                 '.1.7': 'vsxStatusVsPolicyType',
                 '.1.8': 'vsxStatusSicTrustState',
-                '.1.9': 'vsxStatusHAState',
                 '.1.10': 'vsxStatusVSWeight'
             },
         ),
@@ -56,7 +65,8 @@ class VsxDevice(PythonSnmpModeler):
                     'vsMainIP': row.get('vsxStatusMainIP'),
                     'vsPolicyName': row.get('vsxStatusPolicyName'),
                     'vsPolicyType': row.get('vsxStatusVsPolicyType'),
-                    'vsHAState': row.get('vsxStatusHAState')  # should be monitored
+                    'vsId': vsxID,
+                    'snmpindex': snmpindex
                 }
 
                 rm.append(self.objectMap(dict(devDict, **{'id': self.prepId('vsxdev_%s' % vsxID)})))
@@ -68,5 +78,8 @@ class VsxDevice(PythonSnmpModeler):
 
         maps.append(rm)
         maps.append(gatewayOm)
+
+        maps.append(ObjectMap({"totalMemory": int(getdata.get('memTotalReal64'))}, compname="hw"))
+        maps.append(ObjectMap({"totalSwap": int(getdata.get('memTotalVirtual64'))}, compname="os"))
 
         return maps

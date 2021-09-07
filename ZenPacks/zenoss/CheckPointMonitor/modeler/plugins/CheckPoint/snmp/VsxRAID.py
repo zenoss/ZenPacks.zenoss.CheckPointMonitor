@@ -6,7 +6,11 @@
 # License.zenoss under the directory where your Zenoss product is installed.
 #
 ##############################################################################
-"""CheckPoint Monitor (VSX) modeler plugin for RAID Volume and RAID Disk components."""
+"""
+CheckPoint Monitor (VSX) modeler plugin for RAID Volume and RAID Disk components.
+
+Uses CHECKPOINT-MIB
+"""
 
 from Products.DataCollector.plugins.DataMaps import RelationshipMap, ObjectMap
 from Products.DataCollector.plugins.CollectorPlugin import GetTableMap, GetMap
@@ -81,7 +85,7 @@ class VsxRAID(PythonSnmpModeler):
         maps.append(rm)
 
         # RAID Disk
-        rm = self.processDisk(raidDiskTable, volumeCompnames)
+        rm = self.processDisk(raidDiskTable, volumeCompnames, log)
         maps.extend(rm)
 
         return maps
@@ -99,15 +103,15 @@ class VsxRAID(PythonSnmpModeler):
                                  'raidVolumeType': RAID_TYPE_DICT.get(volume.get('raidVolumeType')),
                                  'numOfDisksOnRaid': volume.get('numOfDisksOnRaid'),
                                  'raidVolumeMaxLBA': volume.get('raidVolumeMaxLBA'),
-                                 'raidVolumeSize': volume.get('raidVolumeSize'),
+                                 'raidVolumeSize': self.toBytes(volume.get('raidVolumeSize', 0)),
                                  'snmpindex': snmpindex})
 
             # compnames - used for building compname for disk component
-            compnames[om.raidVolumeID] = ("{}/{}".format(self.relname, om.id), om.id)
+            compnames[om.raidVolumeID] = "{}/{}".format(self.relname, om.id)
             rm.append(om)
         return rm, compnames
 
-    def processDisk(self, data, volumeCompnames):
+    def processDisk(self, data, volumeCompnames, log):
         """Method process() for RAID Disk components"""
 
         modname = 'ZenPacks.zenoss.CheckPointMonitor.VsxRAIDDisk'
@@ -119,31 +123,41 @@ class VsxRAID(PythonSnmpModeler):
         # group data by 'raidDiskVolumeID' field
         for snmpindex, disk in data.items():
             volumeID = disk.get('raidDiskVolumeID')
+            disk.update({'snmpindex': snmpindex})
             if volumeID in sortedData:
-                sortedData[(volumeID, snmpindex)].append(disk)
+                sortedData[volumeID].append(disk)
             else:
-                sortedData[(volumeID, snmpindex)] = [disk]
+                sortedData[volumeID] = [disk]
 
-        for (volumeID, snmpindex), raidDisks in sortedData.items():
-            compname, parentID = volumeCompnames.get(volumeID, ('', ''))
-            diskMaps = []
-            for disk in raidDisks:
-                diskMaps.append(ObjectMap(data={'id': self.prepId('{}_raidDisk_{}'.format(parentID, disk.get('raidDiskID'))),
-                                                'raidDiskIndex': disk.get('raidDiskIndex'),
-                                                'raidDiskID': disk.get('raidDiskID'),
-                                                'raidDiskNumber': RAID_DISK_NUMBER.get(disk.get('raidDiskNumber')),
-                                                'raidDiskVendor': disk.get('raidDiskVendor'),
-                                                'raidDiskProductID': disk.get('raidDiskProductID'),
-                                                'raidDiskRevision': disk.get('raidDiskRevision'),
-                                                'raidDiskMaxLBA': disk.get('raidDiskMaxLBA'),
-                                                'raidDiskSize': disk.get('raidDiskSize'),
-                                                'snmpindex': snmpindex}))
+        for volumeID, raidDisks in sortedData.items():
+            compname = volumeCompnames.get(volumeID)
+            if compname:
+                diskMaps = []
+                for disk in raidDisks:
+                    diskID = self.prepId('{}_raidDisk_{}'.format(compname.split('/')[1], disk.get('raidDiskID')))
+                    diskMaps.append(ObjectMap(data={'id': diskID,
+                                                    'raidDiskIndex': disk.get('raidDiskIndex'),
+                                                    'raidDiskID': disk.get('raidDiskID'),
+                                                    'raidDiskNumber': RAID_DISK_NUMBER.get(disk.get('raidDiskNumber')),
+                                                    'raidDiskVendor': disk.get('raidDiskVendor'),
+                                                    'raidDiskProductID': disk.get('raidDiskProductID'),
+                                                    'raidDiskRevision': disk.get('raidDiskRevision'),
+                                                    'raidDiskMaxLBA': disk.get('raidDiskMaxLBA'),
+                                                    'raidDiskSize': self.toBytes(disk.get('raidDiskSize', 0)),
+                                                    'snmpindex': disk.get('snmpindex')}))
 
+            else:
+                log.error('No compname. Skip creation of subcomponents for RAID Volume component '
+                          '(raidVolumeID={})'.format(volumeID))
+                return maps
             rm = RelationshipMap(compname=compname,
-                                 parentId=parentID,
                                  relname=relname,
                                  modname=modname,
                                  objmaps=diskMaps)
             maps.append(rm)
 
         return maps
+
+    def toBytes(self, value):
+        """Convert GB to Bytes (1 Gigabytes = 1073741824 Bytes)"""
+        return int(value)*1073741824
