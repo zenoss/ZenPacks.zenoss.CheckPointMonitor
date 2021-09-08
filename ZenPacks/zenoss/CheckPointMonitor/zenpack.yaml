@@ -74,6 +74,7 @@ classes:
       devHAState:
         label: HA State
         datapoint: vsxStatusHAState_haState
+        default: 'Unknown'
       devId:
         label: VS Id
       devGatewayIp:
@@ -837,7 +838,7 @@ device_classes:
             datapoints:
               freeAvailPct: {}
         graphs:
-          Disk Utilization:
+          Disk Free Space:
             units: percent
             miny: 0
             maxy: 100
@@ -855,12 +856,18 @@ device_classes:
             units: bytes
             graphpoints:
               multiDiskUsed:
+                lineType: AREA
+                stacked: true
                 legend: Used
                 dpName: multiDiskUsed_used
               multiDiskFreeTotalBytes:
+                lineType: AREA
+                stacked: true
                 legend: Free total
                 dpName: multiDiskFreeTotalBytes_freeTotalBytes
               multiDiskFreeAvailableBytes:
+                lineType: AREA
+                stacked: true
                 legend: Free available
                 dpName: multiDiskFreeAvailableBytes_freeAvailBytes
 
@@ -875,11 +882,12 @@ device_classes:
             plugin_classname: ZenPacks.zenoss.PS.Util.datasources.SnmpStringStatusDataSource.SnmpStringStatusDataSourcePlugin
             oid: 1.3.6.1.4.1.2620.1.16.22.1.1.9
             eventClass: /Status/HA
-            severity: Warning
+            severity: Critical
             resultSeverityMap:
                 'Active': 0
                 'Standby': 3
                 'Backup': 3
+                'N/A': 3
 
   /Network/Check Point/VSX/Device:
     remove: true
