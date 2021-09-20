@@ -901,12 +901,186 @@ device_classes:
         datasources:
           DEFAULTS:
             type: Python SNMP DataSource
-            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.VsxSnmpPlugin
           vsxStatusHAState:
             # High Availability Status
             oid: 1.3.6.1.4.1.2620.1.16.22.1.1.9
             datapoints:
               haState: {}
+          ### CPU ###
+          vsxStatusCPUUsage1sec:
+            # CPU usage (%) in the last 1 second, averaged for all cores
+            oid: 1.3.6.1.4.1.2620.1.16.22.2.1.1
+            datapoints:
+              cpu1sec: {}
+          vsxStatusCPUUsage10sec:
+            # CPU usage (%) in the last 10 seconds, averaged for all cores
+            oid: 1.3.6.1.4.1.2620.1.16.22.2.1.2
+            datapoints:
+              cpu10sec: {}
+          vsxStatusCPUUsage1min:
+            # CPU usage (%) in the last 1 minute, averaged for all cores
+            oid: 1.3.6.1.4.1.2620.1.16.22.2.1.3
+            datapoints:
+              cpu1min: {}
+          vsxStatusCPUUsage1hr:
+            # CPU usage (%) in the last 1 hour, averaged for all cores
+            oid: 1.3.6.1.4.1.2620.1.16.22.2.1.4
+            datapoints:
+              cpu1hr: {}
+          vsxStatusCPUUsage24hr:
+            # CPU usage (%) in the last 24 hours, averaged for all cores
+            oid: 1.3.6.1.4.1.2620.1.16.22.2.1.5
+            datapoints:
+              cpu24hr: {}
+          ### Memory ###
+          vsxStatusMemoryUsage:
+            # VS memory usage (Bytes)
+            oid: 1.3.6.1.4.1.2620.1.16.22.3.1.3
+            datapoints:
+              memoryUsage: {}
+          ### Traffic ###
+          vsxCountersConnNum:
+            # Number of active connections
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.2
+            datapoints:
+              connNum: {}
+          vsxCountersConnPeakNum:
+            # Peak number of active connections
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.3
+            datapoints:
+              connPeakNum: {}
+          vsxCountersPackets:
+            # Total number of packets processed
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.5
+            datapoints:
+              packets: {}
+          vsxCountersDroppedTotal:
+            # Total number of dropped packets
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.6
+            datapoints:
+              droppedTotal: {}
+          vsxCountersAcceptedTotal:
+            # "Total number of accepted packets
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.7
+            datapoints:
+              acceptedTotal: {}
+          vsxCountersRejectedTotal:
+            # Total number of rejected packets
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.8
+            datapoints:
+              rejectedTotal: {}
+          vsxCountersBytesAcceptedTotal:
+            # Total number of accepted bytes
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.9
+            datapoints:
+              acceptedBytes: {}
+          vsxCountersBytesDroppedTotal:
+            # Total number of dropped bytes
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.10
+            datapoints:
+              droppedBytes: {}
+          vsxCountersBytesRejectedTotal:
+            # Total number of rejected bytes
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.11
+            datapoints:
+              rejectedBytes: {}
+          vsxCountersLoggedTotal:
+            # Total number of logs sent
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.12
+            datapoints:
+              loggedTotal: {}
+        graphs:
+          VSX - CPU Usage:
+            units: percent
+            miny: 0
+            maxy: 100
+            graphpoints:
+              vsxStatusCPUUsage1sec:
+                format: '%5.1lf%%'
+                legend: Last 1 second
+                dpName: vsxStatusCPUUsage1sec_cpu1sec
+              vsxStatusCPUUsage10sec:
+                format: '%5.1lf%%'
+                legend: Last 10 seconds
+                dpName: vsxStatusCPUUsage10sec_cpu10sec
+              vsxStatusCPUUsage1min:
+                format: '%5.1lf%%'
+                legend: Last 1 minute
+                dpName: vsxStatusCPUUsage1min_cpu1min
+              vsxStatusCPUUsage1hr:
+                format: '%5.1lf%%'
+                legend: Last 1 hour
+                dpName: vsxStatusCPUUsage1hr_cpu1hr
+              vsxStatusCPUUsage24hr:
+                format: '%5.1lf%%'
+                legend: Last 24 hours
+                dpName: vsxStatusCPUUsage24hr_cpu24hr
+          VSX - Memory Usage:
+            base: true
+            units: bytes
+            miny: 0
+            graphpoints:
+              vsxStatusMemoryUsage:
+                format: '%5.1lf%'
+                legend: Memory
+                lineType: AREA
+                dpName: vsxStatusMemoryUsage_memoryUsage
+          VSX - Connections:
+            units: connections
+            miny: 0
+            graphpoints:
+              vsxCountersConnNum:
+                format: '%6.0lf'
+                lineType: AREA
+                legend: Active
+                dpName: vsxCountersConnNum_connNum
+              vsxCountersConnPeakNum:
+                format: '%6.0lf'
+                legend: Peak
+                dpName: vsxCountersConnPeakNum_connPeakNum
+              vsxCountersConnTableLimit:
+                format: '%6.0lf'
+                legend: Limit
+                dpName: vsxCountersConnTableLimit_tableLimit
+          VSX - Packet Handling:
+            units: packets
+            miny: 0
+            graphpoints:
+              vsxCountersPackets:
+                format: '%6.0lf'
+                legend: Processed
+                dpName: vsxCountersPackets_packets
+              vsxCountersDroppedTotal:
+                format: '%6.0lf'
+                legend: Dropped
+                dpName: vsxCountersDroppedTotal_droppedTotal
+              vsxCountersAcceptedTotal:
+                format: '%6.0lf'
+                legend: Accepted
+                dpName: vsxCountersAcceptedTotal_acceptedTotal
+              vsxCountersRejectedTotal:
+                format: '%6.0lf'
+                legend: Rejected
+                dpName: vsxCountersRejectedTotal_rejectedTotal
+              vsxCountersLoggedTotal:
+                format: '%6.0lf'
+                legend: Logged
+                dpName: vsxCountersLoggedTotal_loggedTotal
+          VSX - Bytes Handling:
+            base: true
+            units: bytes
+            miny: 0
+            graphpoints:
+              vsxCountersBytesAcceptedTotal:
+                legend: Accepted
+                dpName: vsxCountersBytesAcceptedTotal_acceptedBytes
+              vsxCountersBytesDroppedTotal:
+                legend: Dropped
+                dpName: vsxCountersBytesDroppedTotal_droppedBytes
+              vsxCountersBytesRejectedTotal:
+                legend: Rejected
+                dpName: vsxCountersBytesRejectedTotal_rejectedBytes
 
 class_relationships:
   - GatewayDevice 1:MC VsxDevice
