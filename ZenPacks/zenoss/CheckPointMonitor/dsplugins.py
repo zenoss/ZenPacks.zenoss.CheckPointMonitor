@@ -29,3 +29,22 @@ class VsxSnmpPlugin(PythonSnmpDataSourcePlugin):
 
         # call the parent collect with our custom connectionInfo
         return super(VsxSnmpPlugin, self).collect(config, connInfoOverrides)
+
+
+class VirtualSystemSnmpPlugin(PythonSnmpDataSourcePlugin):
+    """Datasource plugin for monitoring VSX Virtual System"""
+
+    proxy_attributes = PythonSnmpDataSourcePlugin.proxy_attributes + ('devGatewayIp', 'devId')
+
+    def collect(self, config, connInfoOverrides=None):
+        """Override due to SNMP queries must be sent to the IP address of VSX Gateway and set context - vsid{x}"""
+
+        ds0 = config.datasources[0]
+
+        connInfoOverrides = {
+            'manageIp': ds0.devGatewayIp,
+            'zSnmpContext': ds0.devId
+        }
+
+        # call the parent collect with our custom connectionInfo
+        return super(VirtualSystemSnmpPlugin, self).collect(config, connInfoOverrides)

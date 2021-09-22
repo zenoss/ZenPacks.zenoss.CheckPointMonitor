@@ -104,6 +104,7 @@ class VsxDeviceJob(Job):
             zenossDeviceId = devDetails['title']
             manageIp = None if devDetails['vsMainIP'] == 'N/A' else devDetails['vsMainIP']
             snmpindex = devDetails['snmpindex']
+            vsId = devDetails['vsId']
             if not manageIp:
                 self.log.warning("Device %s has no associated manageIp - will add to Zenoss without IP.", devId)
 
@@ -116,7 +117,7 @@ class VsxDeviceJob(Job):
                 try:
                     newDevices.append(
                         self.addDevice(
-                            zenossDeviceId, manageIp, collectorId, gatewayDev, deviceClass, snmpindex
+                            zenossDeviceId, manageIp, collectorId, gatewayDev, deviceClass, snmpindex, vsId
                         )
                     )
                 # except Exception as ex:
@@ -147,7 +148,7 @@ class VsxDeviceJob(Job):
                 device.collectDevice(background=True, setlog=True)
 
     @transact
-    def addDevice(self, zenossDeviceId, ip, collectorId, tenantDev, deviceClass, snmpindex):
+    def addDevice(self, zenossDeviceId, ip, collectorId, tenantDev, deviceClass, snmpindex, vsId):
         """
         TODO
         """
@@ -164,6 +165,7 @@ class VsxDeviceJob(Job):
         device.setPerformanceMonitor(collectorId)
         device.devGatewayIp = tenantDev.manageIp
         device.snmpindex = snmpindex
+        device.devId = 'vsid{}'.format(vsId)
         if ip:
             device.setManageIp(ip)
             # manageIp won't stick if it's already in use
