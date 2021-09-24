@@ -49,10 +49,6 @@ class VirtualSystemSnmpPlugin(PythonSnmpDataSourcePlugin):
         # call the parent collect with our custom connectionInfo
         return super(VirtualSystemSnmpPlugin, self).collect(config, connInfoOverrides)
 
-    def onSuccess(self, result, config):
-        data = super(VirtualSystemSnmpPlugin, self).onSuccess(result, config)
-        return data
-
 
 class StatusCodeDescSnmp(VirtualSystemSnmpPlugin):
     """Datasource plugin for monitoring Virtual System Statuses - used Status code and Status short desc values"""
@@ -75,7 +71,12 @@ class StatusCodeDescSnmp(VirtualSystemSnmpPlugin):
 
         # 0 - Clear, 4 - Error
         severity = 0 if statusCode == 0 else 4
-        summary = "{} status is '{}' ({})".format(self.dsName, statusCode, description)
+        summary = "{} status is '{}'".format(self.dsName, statusCode)
+        message = "Status code: {};\nShort description: {};".format(statusCode, description)
+
+        # if no value returned for statusCode oid
+        if statusCode == -1:
+            return data
 
         data['events'].append(self.getEvent(
             device=config.id,
@@ -83,34 +84,52 @@ class StatusCodeDescSnmp(VirtualSystemSnmpPlugin):
             severity=severity,
             eventClassKey=self.eventClassKey,
             eventKey=self.eventKey,
-            message=summary
+            message=message
         ))
 
         return data
 
 
-class VpnSiteToSiteSnmp(StatusCodeDescSnmp):
-    """Datasource plugin for monitoring Virtual System - VPN Site-to-Site"""
-
-    dsName = 'VPN Site-to-Site'
-    eventKey = 'VpnSiteToSiteStatus'
-    eventClassKey = '/Status/VSX/VPNS2S'
-
-
-class VpnRemoteAccessSnmp(StatusCodeDescSnmp):
-    """Datasource plugin for monitoring Virtual System - VPN Remote Access"""
-
-    dsName = 'VPN Remote Access'
-    eventKey = 'VpnRemoteAccessStatus'
-    eventClassKey = '/Status/VSX/RA'
-
-
-class VSClusterStatusSnmp(StatusCodeDescSnmp):
+class ClusterStatusSnmp(StatusCodeDescSnmp):
     """Datasource plugin for monitoring Virtual System - Cluster Status"""
 
     dsName = 'Cluster'
     eventKey = 'ClusterStatus'
-    eventClassKey = '/Status/VSX/Cluster'
+    eventClassKey = 'Cluster'
+
+    def onSuccess(self, result, config):
+        """ Override to add Cluster state event
+
+        '.1.3.6.1.4.1.2620.1.5.5.0' - haStarted oid
+        '.1.3.6.1.4.1.2620.1.5.6.0' - haState oid
+        """
+
+        data = super(ClusterStatusSnmp, self).onSuccess(result, config)
+
+        getData, _ = result
+
+        try:
+            haStarted = getData['.1.3.6.1.4.1.2620.1.5.5.0']
+            haState = getData['.1.3.6.1.4.1.2620.1.5.6.0']
+        except KeyError:
+            # no need to create event - PS.Util handle case for missing datapoints
+            return data
+
+        # 0 - Clear, 4 - Error
+        severity = 0 if haStarted == 'yes' else 4
+        summary = "{} is started: {}".format(self.dsName, haStarted)
+        message = "Cluster started: {};\nCluster state: {};".format(haStarted, haState)
+
+        data['events'].append(self.getEvent(
+            device=config.id,
+            summary=summary,
+            severity=severity,
+            eventClassKey=self.eventClassKey,
+            eventKey='HA',
+            message=message
+        ))
+
+        return data
 
 
 class UrlFilterSnmp(StatusCodeDescSnmp):
@@ -118,39 +137,73 @@ class UrlFilterSnmp(StatusCodeDescSnmp):
 
     dsName = 'URL Filter'
     eventKey = 'UrlFilterStatus'
-    eventClassKey = '/Status/VSX/URLFilter'
+    eventClassKey = 'UrlFilter'
+
+    def onSuccess(self, result, config):
+        """ Override to add RAD status event
+
+        '.1.3.6.1.4.1.2620.1.43.3.1.0' - advancedUrlFilteringRADStatusCode oid
+        '.1.3.6.1.4.1.2620.1.43.3.2.0' - advancedUrlFilteringRADStatusDesc oid
+        """
+
+        data = super(UrlFilterSnmp, self).onSuccess(result, config)
+
+        getData, _ = result
+
+        try:
+            radCode = getData['.1.3.6.1.4.1.2620.1.43.3.1.0']
+            radDesc = getData['.1.3.6.1.4.1.2620.1.43.3.2.0']
+        except KeyError:
+            # no need to create event - PS.Util handle case for missing datapoints
+            return data
+
+        # 0 - Clear, 4 - Error
+        severity = 0 if radCode == 0 else 4
+        summary = "RAD status code is: {}".format(radCode)
+        message = "RAD status code: {};\nRAD status description: {};".format(radCode, radDesc)
+
+        data['events'].append(self.getEvent(
+            device=config.id,
+            summary=summary,
+            severity=severity,
+            eventClassKey=self.eventClassKey,
+            eventKey='RAD',
+            message=message
+        ))
+
+        return data
 
 
 class AppControlSnmp(StatusCodeDescSnmp):
     """Datasource plugin for monitoring Virtual System - Application Control"""
 
     dsName = 'Application Control'
-    eventKey = 'AppControlStatus'
-    eventClassKey = '/Status/VSX/AppControl'
+    eventKey = 'AppStatus'
+    eventClassKey = 'AppControl'
 
 
 class AntiBotVirusSnmp(StatusCodeDescSnmp):
     """Datasource plugin for monitoring Virtual System - Anti-Bot & Anti-Virus status"""
 
     dsName = 'Anti Bot & Anti Virus'
-    eventKey = 'AntiBotVirusStatus'
-    eventClassKey = '/Status/VSX/AMW'
+    eventKey = 'AmwStatus'
+    eventClassKey = 'AntiBotVirus'
 
 
 class IdentityAwarenessSnmp(StatusCodeDescSnmp):
     """Datasource plugin for monitoring Virtual System - Identity Awareness"""
 
     dsName = 'Identity Awareness'
-    eventKey = 'IdentityAwarenessStatus'
-    eventClassKey = '/Status/VSX/IDA'
+    eventKey = 'IdaStatus'
+    eventClassKey = 'IdentityAwareness'
 
 
 class ThreatEmulationSnmp(StatusCodeDescSnmp):
     """Datasource plugin for monitoring Virtual System - Threat Emulation"""
 
     dsName = 'Threat Emulation'
-    eventKey = 'ThreatEmulationStatus'
-    eventClassKey = '/Status/VSX/TE'
+    eventKey = 'TeStatus'
+    eventClassKey = 'ThreatEmulation'
 
 
 class SmartEventSnmp(StatusCodeDescSnmp):
@@ -158,4 +211,4 @@ class SmartEventSnmp(StatusCodeDescSnmp):
 
     dsName = 'Smart Event (CPSEMD)'
     eventKey = 'SmartEventStatus'
-    eventClassKey = '/Status/VSX/CPSEMD'
+    eventClassKey = 'SmartEvent'
