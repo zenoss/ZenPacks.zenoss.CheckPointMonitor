@@ -165,7 +165,8 @@ class VsxDeviceJob(Job):
         device.setPerformanceMonitor(collectorId)
         device.devGatewayIp = tenantDev.manageIp
         device.snmpindex = snmpindex
-        device.devId = 'vsid{}'.format(vsId)
+        # vsidN is the SNMP context name required by SNMP v3 (ex. vsid2)
+        device.setZenProperty("zSnmpContext", 'vsid{}'.format(vsId))
         if ip:
             device.setManageIp(ip)
             # manageIp won't stick if it's already in use

@@ -12,6 +12,8 @@ CheckPoint Monitor (VSX) modeler plugin for RAID Volume and RAID Disk components
 Uses CHECKPOINT-MIB
 """
 
+from collections import defaultdict
+
 from Products.DataCollector.plugins.DataMaps import RelationshipMap, ObjectMap
 from Products.DataCollector.plugins.CollectorPlugin import GetTableMap, GetMap
 
@@ -118,16 +120,13 @@ class VsxRAID(PythonSnmpModeler):
         relname = 'vsxRAIDDisks'
 
         maps = []
-        sortedData = {}
+        sortedData = defaultdict(list)
 
         # group data by 'raidDiskVolumeID' field
         for snmpindex, disk in data.items():
             volumeID = disk.get('raidDiskVolumeID')
             disk.update({'snmpindex': snmpindex})
-            if volumeID in sortedData:
-                sortedData[volumeID].append(disk)
-            else:
-                sortedData[volumeID] = [disk]
+            sortedData[volumeID].append(disk)
 
         for volumeID, raidDisks in sortedData.items():
             compname = volumeCompnames.get(volumeID)

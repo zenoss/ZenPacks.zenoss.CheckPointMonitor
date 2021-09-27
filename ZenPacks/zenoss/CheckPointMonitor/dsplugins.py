@@ -31,26 +31,7 @@ class VsxSnmpPlugin(PythonSnmpDataSourcePlugin):
         return super(VsxSnmpPlugin, self).collect(config, connInfoOverrides)
 
 
-class VirtualSystemSnmpPlugin(PythonSnmpDataSourcePlugin):
-    """Datasource plugin for monitoring VSX Virtual System"""
-
-    proxy_attributes = PythonSnmpDataSourcePlugin.proxy_attributes + ('devGatewayIp', 'devId')
-
-    def collect(self, config, connInfoOverrides=None):
-        """Override due to SNMP queries must be sent to the IP address of VSX Gateway and set context - vsid{x}"""
-
-        ds0 = config.datasources[0]
-
-        connInfoOverrides = {
-            'manageIp': ds0.devGatewayIp,
-            'zSnmpContext': ds0.devId
-        }
-
-        # call the parent collect with our custom connectionInfo
-        return super(VirtualSystemSnmpPlugin, self).collect(config, connInfoOverrides)
-
-
-class StatusCodeDescSnmp(VirtualSystemSnmpPlugin):
+class StatusCodeDescSnmp(VsxSnmpPlugin):
     """Datasource plugin for monitoring Virtual System Statuses - used Status code and Status short desc values"""
 
     dsName = ''
@@ -63,11 +44,11 @@ class StatusCodeDescSnmp(VirtualSystemSnmpPlugin):
         statusCode = -1
         description = ''
         getData, _ = result
-        for k, v in getData.items():
-            if '101' in k:
-                statusCode = v
-            elif '102' in k:
-                description = v
+        for oid, dpValue in getData.items():
+            if '101' in oid:
+                statusCode = dpValue
+            elif '102' in oid:
+                description = dpValue
 
         # 0 - Clear, 4 - Error
         severity = 0 if statusCode == 0 else 4
