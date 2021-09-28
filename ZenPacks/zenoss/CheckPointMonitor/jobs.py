@@ -40,7 +40,7 @@ class VsxDeviceJob(Job):
         collectorId = gatewayDev.getPerformanceServer().id
 
         # Find devices already added by this Gateway that we can skip
-        # And devices added that have disappeared so we can remove
+        # And devices added that have disappeared so we can move them into 'Decommissioned' state
         removeDevices = {}
         deviceClass = self.dmd.Devices.getOrganizer('/Network/Check Point/VSX/Device')
         catalog = ICatalogTool(deviceClass)
@@ -72,10 +72,12 @@ class VsxDeviceJob(Job):
             self.log.info("Moving into decommissioned production state %s %d/%d (%.2f%%)",
                           devId, count, total,
                           float(count) / total * 100)
-            message = "Device moved because it's not in the list of devices returned for this Gateway",
+
             try:
                 # -1 is value for Decommissioned state
                 device.setProdState(-1)
+                device.manageIp = ''
+                device.renameDevice(newId='{}-DECOMMISSIONED'.format(devId))
             except Exception as ex:
                 self.log.exception("Error while changing production state for device {}".format(devId))
                 zep.create(
@@ -89,7 +91,7 @@ class VsxDeviceJob(Job):
                 severity="Info",
                 device=gatewayDev.id,
                 message="Device is not reported in the list of devices for this Gateway. Production state was changed to Decommissioned",
-                # TODO add eventclasskey
+                eventClassKey='VsxDeviceJob'
             )
 
         ###
@@ -112,9 +114,13 @@ class VsxDeviceJob(Job):
                           zenossDeviceId, count, total,
                           float(count) / total * 100)
 
+            baseSummary = "VSX device {} reported from Gateway {}".format(devId, gatewayDev.id)
+            severity = "Info"
+
             if gatewayDev.zVsxCreateDevices:
-                message = "New Device reported from Gateway. New VSX device will be created"
                 try:
+                    message = "New Device {} reported from Gateway {}. VSX device will be created".format(devId, gatewayDev.id)
+                    summary = 'Adding device.' + baseSummary
                     newDevices.append(
                         self.addDevice(
                             zenossDeviceId, manageIp, collectorId, gatewayDev, deviceClass, snmpindex, vsId
@@ -123,20 +129,20 @@ class VsxDeviceJob(Job):
                 # except Exception as ex:
                 except RuntimeError as ex:
                     self.log.exception("Error while creating device {}".format(zenossDeviceId))
-                    zep.create(
-                        summary=ex.message,
-                        severity="Error",
-                        device=gatewayDev.id,
-                        message=traceback.format_exc(),
-                    )
+                    summary = ex.message
+                    severity = "Error"
+                    message = traceback.format_exc()
             else:
-                message = "New Device reported from Gateway. New VSX device won't be created"
+                message = "New Device {} reported from Gateway {}. New VSX device won't be created " \
+                          "(because zVsxCreateDevices set to False)".format(devId, gatewayDev.id)
+                summary = 'Skip adding device.' + baseSummary
+
             zep.create(
-                summary="VSX device {} reported from Gateway {}".format(devId, gatewayDev.id),
-                severity="Info",
+                summary=summary,
+                severity=severity,
                 device=gatewayDev.id,
                 message=message,
-                # TODO add eventclasskey
+                eventClassKey='VsxDeviceJob'
             )
 
         # Model the new devices in the background

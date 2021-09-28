@@ -4,9 +4,6 @@ zProperties:
   zVsxCreateDevices:
     type: boolean
     default: true
-  zVsxRemoveDevices:
-    type: boolean
-    default: true
 
 classes:
   CheckPointDevice:
@@ -1330,32 +1327,32 @@ event_classes:
       evt.summary = re.sub('fwState', component, summary)
   /Status/VSX/Cluster:
     mappings:
-      Cluster:
-        eventClassKey: Cluster
+      VsCluster:
+        eventClassKey: VsCluster
   /Status/VSX/URLFilter:
     mappings:
-      UrlFilter:
-        eventClassKey: UrlFilter
+      VsUrlFilter:
+        eventClassKey: VsUrlFilter
   /Status/VSX/AppControl:
     mappings:
-      AppControl:
-        eventClassKey: AppControl
+      VsAppControl:
+        eventClassKey: VsAppControl
   /Status/VSX/AMW:
     mappings:
-      AntiBotVirus:
-        eventClassKey: AntiBotVirus
+      VsAntiBotVirus:
+        eventClassKey: VsAntiBotVirus
   /Status/VSX/IDA:
     mappings:
-      IdentityAwareness:
-        eventClassKey: IdentityAwareness
+      VsIdentityAwareness:
+        eventClassKey: VsIdentityAwareness
   /Status/VSX/TE:
     mappings:
-      ThreatEmulation:
-        eventClassKey: ThreatEmulation
+      VsThreatEmulation:
+        eventClassKey: VsThreatEmulation
   /Status/VSX/CPSEMD:
     mappings:
-      SmartEvent:
-        eventClassKey: SmartEvent
+      VsSmartEvent:
+        eventClassKey: VsSmartEvent
   /App/Zenoss/Collection:
     # from ZenPack dsplugins
     mappings:
@@ -1379,3 +1376,7 @@ event_classes:
         eventClassKey: ThreatEmulationSnmpPoints
       SmartEventSnmpPoints:
         eventClassKey: SmartEventSnmpPoints
+  /App/Job/VsxDeviceJob:
+    mappings:
+      VsxDeviceJob:
+        eventClassKey: VsxDeviceJob
