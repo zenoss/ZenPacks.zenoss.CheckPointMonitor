@@ -90,7 +90,8 @@ class VsxDeviceJob(Job):
                 summary="VSX device {} ({}) not reported from Gateway {}".format(device.title, devId, gatewayDev.id),
                 severity="Info",
                 device=gatewayDev.id,
-                message="Device is not reported in the list of devices for this Gateway. Production state was changed to Decommissioned",
+                message="Device is not reported in the list of devices for this Gateway. "
+                        "Production state was changed to Decommissioned, manageIP value was deleted",
                 eventClassKey='VsxDeviceJob'
             )
 

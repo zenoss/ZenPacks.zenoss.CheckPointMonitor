@@ -31,6 +31,44 @@ class VsxSnmpPlugin(PythonSnmpDataSourcePlugin):
         return super(VsxSnmpPlugin, self).collect(config, connInfoOverrides)
 
 
+class HaStateSnmp(VsxSnmpPlugin):
+    """Datasource plugin for monitoring Virtual System - HA State"""
+
+    dsName = 'HA'
+    eventKey = 'HaStatus'
+    eventClassKey = 'VsHA'
+
+    def onSuccess(self, result, config):
+        """ Override to add HA state event
+
+        '.1.3.6.1.4.1.2620.1.16.22.1.1.9' - vsxStatusHAState
+        """
+
+        data = super(HaStateSnmp, self).onSuccess(result, config)
+
+        getData, _ = result
+
+        try:
+            vsxStatusHAState = getData['.1.3.6.1.4.1.2620.1.16.22.1.1.9']
+        except KeyError:
+            # no need to create event - PS.Util handle case for missing datapoints
+            return data
+
+        severity = 2  # Info
+        summary = "{} state is: {}".format(self.dsName, vsxStatusHAState)
+
+        data['events'].append(self.getEvent(
+            device=config.id,
+            summary=summary,
+            severity=severity,
+            eventClassKey=self.eventClassKey,
+            eventKey='HA',
+            message=summary
+        ))
+
+        return data
+
+
 class StatusCodeDescSnmp(VsxSnmpPlugin):
     """Datasource plugin for monitoring Virtual System Statuses - used Status code and Status short desc values"""
 
@@ -76,7 +114,7 @@ class ClusterStatusSnmp(StatusCodeDescSnmp):
 
     dsName = 'Cluster'
     eventKey = 'ClusterStatus'
-    eventClassKey = 'Cluster'
+    eventClassKey = 'VsCluster'
 
     def onSuccess(self, result, config):
         """ Override to add Cluster state event
@@ -118,7 +156,7 @@ class UrlFilterSnmp(StatusCodeDescSnmp):
 
     dsName = 'URL Filter'
     eventKey = 'UrlFilterStatus'
-    eventClassKey = 'UrlFilter'
+    eventClassKey = 'VsUrlFilter'
 
     def onSuccess(self, result, config):
         """ Override to add RAD status event
@@ -160,7 +198,7 @@ class AppControlSnmp(StatusCodeDescSnmp):
 
     dsName = 'Application Control'
     eventKey = 'AppStatus'
-    eventClassKey = 'AppControl'
+    eventClassKey = 'VsAppControl'
 
 
 class AntiBotVirusSnmp(StatusCodeDescSnmp):
@@ -168,7 +206,7 @@ class AntiBotVirusSnmp(StatusCodeDescSnmp):
 
     dsName = 'Anti Bot & Anti Virus'
     eventKey = 'AmwStatus'
-    eventClassKey = 'AntiBotVirus'
+    eventClassKey = 'VsAntiBotVirus'
 
 
 class IdentityAwarenessSnmp(StatusCodeDescSnmp):
@@ -176,7 +214,7 @@ class IdentityAwarenessSnmp(StatusCodeDescSnmp):
 
     dsName = 'Identity Awareness'
     eventKey = 'IdaStatus'
-    eventClassKey = 'IdentityAwareness'
+    eventClassKey = 'VsIdentityAwareness'
 
 
 class ThreatEmulationSnmp(StatusCodeDescSnmp):
@@ -184,7 +222,7 @@ class ThreatEmulationSnmp(StatusCodeDescSnmp):
 
     dsName = 'Threat Emulation'
     eventKey = 'TeStatus'
-    eventClassKey = 'ThreatEmulation'
+    eventClassKey = 'VsThreatEmulation'
 
 
 class SmartEventSnmp(StatusCodeDescSnmp):
@@ -192,4 +230,4 @@ class SmartEventSnmp(StatusCodeDescSnmp):
 
     dsName = 'Smart Event (CPSEMD)'
     eventKey = 'SmartEventStatus'
-    eventClassKey = 'SmartEvent'
+    eventClassKey = 'VsSmartEvent'
