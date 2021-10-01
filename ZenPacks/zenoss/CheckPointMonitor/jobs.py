@@ -7,6 +7,8 @@
 #
 ##############################################################################
 
+"""Job for creating/updating Virtual Devices."""
+
 from Products.Jobber.jobs import Job
 
 import time
@@ -26,7 +28,7 @@ class VsxDeviceJob(Job):
 
     def _run(self, vsxDevices, vsxGatewayID):
         """
-        TODO
+        Run job for creation/updating Virtual Devices
         """
 
         zep = getFacade("zep", self.dmd)
@@ -157,7 +159,7 @@ class VsxDeviceJob(Job):
     @transact
     def addDevice(self, zenossDeviceId, ip, collectorId, tenantDev, deviceClass, snmpindex, vsId):
         """
-        TODO
+        Create Virtual Device for given Gateway Device
         """
 
         # Check for duplicate IP
