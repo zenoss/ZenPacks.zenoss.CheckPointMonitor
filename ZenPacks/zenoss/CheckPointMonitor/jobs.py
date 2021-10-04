@@ -89,7 +89,7 @@ class VsxDeviceJob(Job):
                     message=traceback.format_exc(),
                 )
             zep.create(
-                summary="VSX device {} ({}) not reported from Gateway {}".format(device.title, devId, gatewayDev.id),
+                summary="Changing prodState. VSX device {} ({}) not reported from Gateway {}".format(device.title, devId, gatewayDev.id),
                 severity="Info",
                 device=gatewayDev.id,
                 message="Device is not reported in the list of devices for this Gateway. "
@@ -123,7 +123,7 @@ class VsxDeviceJob(Job):
             if gatewayDev.zVsxCreateDevices:
                 try:
                     message = "New Device {} reported from Gateway {}. VSX device will be created".format(devId, gatewayDev.id)
-                    summary = 'Adding device.' + baseSummary
+                    summary = 'Adding device. ' + baseSummary
                     newDevices.append(
                         self.addDevice(
                             zenossDeviceId, manageIp, collectorId, gatewayDev, deviceClass, snmpindex, vsId
@@ -138,7 +138,7 @@ class VsxDeviceJob(Job):
             else:
                 message = "New Device {} reported from Gateway {}. New VSX device won't be created " \
                           "(because zVsxCreateDevices set to False)".format(devId, gatewayDev.id)
-                summary = 'Skip adding device.' + baseSummary
+                summary = 'Skip adding device. ' + baseSummary
 
             zep.create(
                 summary=summary,
