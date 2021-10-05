@@ -1,60 +1,61 @@
 ##############################################################################
 # 
-# Copyright (C) Zenoss, Inc. 2008, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2008, 2021, all rights reserved.
 # 
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
 # 
 ##############################################################################
 
-
-import Globals
 import os
+import logging
+
+from Products.CMFCore.DirectoryView import registerDirectory
+from Products.Zuul.facades.manufacturersfacade import ManufacturersFacade
+
+from ZenPacks.zenoss.ZenPackLib import zenpacklib
+
+
+CFG = zenpacklib.load_yaml([os.path.join(os.path.dirname(__file__), "zenpack.yaml")], verbose=False, level=30)
+schema = CFG.zenpack_module.schema
 
 skinsDir = os.path.join(os.path.dirname(__file__), 'skins')
-from Products.CMFCore.DirectoryView import registerDirectory
 if os.path.isdir(skinsDir):
     registerDirectory(skinsDir, globals())
 
-from Products.ZenModel.ZenPack import ZenPackBase
-from Products.ZenUtils.Utils import zenPath
+log = logging.getLogger("zen.CheckPoint")
 
 
-class ZenPack(ZenPackBase):
-    """ CheckPointMonitor loader
-    """
-    
+MANUFACTURER_NAME = 'Check Point'
+MANUFACTURER_UID = '/zport/dmd/Manufacturers/Check Point'
+
+
+class ZenPack(schema.ZenPack):
+
     def install(self, app):
-        ZenPackBase.install(self, app)
-        self.copyDependencies()
-        self.symlinkPlugin()
-        
-    def upgrade(self, app):
-        ZenPackBase.upgrade(self, app)
-        self.copyDependencies()
-        self.symlinkPlugin()
-        
-    def remove(self, app, leaveObjects=False):
-        self.removePluginSymlink()
-        ZenPackBase.remove(self, app, leaveObjects)
-    
-        
-    def copyDependencies(self):
-        os.system("cp %s/EasySnmpPlugin.py %s/" % (
-            self.path('libexec'), zenPath('libexec')))
-    
-    def symlinkPlugin(self):
-        os.system('ln -sf %s/check_checkPointFwState.py %s/' % (
-            self.path('libexec'), zenPath('libexec')))
-        os.system('ln -sf %s/check_checkPointHaState.py %s/' % (
-            self.path('libexec'), zenPath('libexec')))
-        os.system('ln -sf %s/check_checkPointDtpsState.py %s/' % (
-            self.path('libexec'), zenPath('libexec')))
-            
-    def removePluginSymlink(self):
-        os.system('rm -f %s/check_checkPointFwState.py' % (
-            zenPath('libexec')))
-        os.system('rm -f %s/check_checkPointHaState.py' % (
-            zenPath('libexec')))
-        os.system('rm -f %s/check_checkPointDtpsState.py' % (
-            zenPath('libexec')))
+        super(ZenPack, self).install(app)
+
+        # create 'Check Point' manufacturer and its products if they don't exist yet
+        manufacturers = app.dmd.Manufacturers
+        if MANUFACTURER_NAME not in manufacturers:
+            mFacade = ManufacturersFacade(manufacturers)
+            mFacade.addManufacturer(MANUFACTURER_NAME)
+            log.info('New manufacturer [{}] was added'.format(MANUFACTURER_NAME))
+
+            mFacade.addNewProduct({
+                'uid': MANUFACTURER_UID,
+                'prodname': 'Gaia (2.6)',
+                'prodkeys': 'Gaia (2.6)',
+                'type': 'Operating System',
+                'partno': '',
+                'description': ''
+            })
+
+            mFacade.addNewProduct({
+                'uid': MANUFACTURER_UID,
+                'prodname': 'SecurePlatform (NGX R65)',
+                'prodkeys': 'SecurePlatform (NGX R65)',
+                'type': 'Hardware',
+                'partno': '',
+                'description': ''
+            })
