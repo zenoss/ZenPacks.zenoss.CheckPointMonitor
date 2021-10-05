@@ -47,25 +47,26 @@ class HaStateSnmp(VsxSnmpPlugin):
         data = super(HaStateSnmp, self).onSuccess(result, config)
 
         getData, _ = result
+        vsxStatusHAState = ''
 
-        try:
-            vsxStatusHAState = getData['.1.3.6.1.4.1.2620.1.16.22.1.1.9']
-        except KeyError:
-            # no need to create event - PS.Util handle case for missing datapoints
-            return data
+        for oid, dpValue in getData.items():
+            if '.1.3.6.1.4.1.2620.1.16.22.1.1.9' not in oid:
+                # no need to create event - PS.Util handle case for missing datapoints
+                return data
+            else:
+                vsxStatusHAState = dpValue
 
         severity = 2  # Info
-        summary = "{} state is: {}".format(self.dsName, vsxStatusHAState)
+        summary = "{} state is {}".format(self.dsName, vsxStatusHAState)
 
         data['events'].append(self.getEvent(
             device=config.id,
             summary=summary,
             severity=severity,
             eventClassKey=self.eventClassKey,
-            eventKey='HA',
+            eventKey='HaState',
             message=summary
         ))
-
         return data
 
 
@@ -83,8 +84,10 @@ class StatusCodeDescSnmp(VsxSnmpPlugin):
         description = ''
         getData, _ = result
         for oid, dpValue in getData.items():
+            # 101 states for "Status code"
             if '101' in oid:
                 statusCode = dpValue
+            # 102 states for "Status short description"
             elif '102' in oid:
                 description = dpValue
 
