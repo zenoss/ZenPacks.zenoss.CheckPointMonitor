@@ -1314,38 +1314,47 @@ event_classes:
       evt.component = component
       evt.summary = re.sub('fwState', component, summary)
   /Status/VSX/HA:
+    remove: true
     mappings:
       VsHA:
         eventClassKey: VsHA
   /Status/VSX/Cluster:
+    remove: true
     mappings:
       VsCluster:
         eventClassKey: VsCluster
   /Status/VSX/URLFilter:
+    remove: true
     mappings:
       VsUrlFilter:
         eventClassKey: VsUrlFilter
   /Status/VSX/AppControl:
+    remove: true
     mappings:
       VsAppControl:
         eventClassKey: VsAppControl
   /Status/VSX/AMW:
+    remove: true
     mappings:
       VsAntiBotVirus:
         eventClassKey: VsAntiBotVirus
   /Status/VSX/IDA:
+    remove: true
     mappings:
       VsIdentityAwareness:
         eventClassKey: VsIdentityAwareness
   /Status/VSX/TE:
+    remove: true
     mappings:
       VsThreatEmulation:
         eventClassKey: VsThreatEmulation
   /Status/VSX/CPSEMD:
+    remove: true
     mappings:
       VsSmartEvent:
         eventClassKey: VsSmartEvent
   /App/Zenoss/Collection:
+    remove: true
     # from ZenPack dsplugins
     mappings:
       VsxSnmpPluginPoints:
@@ -1369,6 +1378,7 @@ event_classes:
       SmartEventSnmpPoints:
         eventClassKey: SmartEventSnmpPoints
   /VSX/Job/VsxDevice:
+    remove: true
     mappings:
       VsxDeviceJob:
         eventClassKey: VsxDeviceJob
