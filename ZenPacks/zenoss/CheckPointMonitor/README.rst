@@ -12,6 +12,9 @@ The ZenPacks.zenoss.CheckPointMonitor ZenPack monitors security appliances from 
 With this ZenPack, you can ensure that the firewall module has a policy installed,
 HA is in a proper state, and that the policy server (for SecureClient) is running.
 
+Starting from 3.0.0 version the ZenPacks.zenoss.CheckPointMonitor includes the new SNMP structures for Virtual Firewalls
+to support the CheckPoint R80.30 version. For modeling/monitoring VSX devices SNMP v3 and SNMP VS Mode were used.
+
 
 Prerequisites
 -------------
@@ -84,6 +87,44 @@ All Check Point devices must exist under the */Devices/Network/Check Point* devi
 3. Click *Save* to save your changes. You will now be able to start collecting the Check Point firewall metrics from this device.
 
 4. Navigate to Graphs and you should see some placeholders for performance graphs. After approximately fifteen minutes you should see the graphs start to become populated with information.
+
+
+VSX
+---
+
+Virtual System Extension. Check Point virtual networking solution, hosted on a computer or cluster with virtual abstractions of Check Point Security Gateways and other network devices.
+
+
+Gateway
+=======
+
+A VSX Gateway is a physical machine that hosts virtual networks of Virtual Devices, with the functionality of their physical network counterparts such as: Security Gateways, routers and switches.
+
+
+Modeler Plugins:
+
+* CheckPoint.DeviceMap
+* CheckPoint.snmp.VsxDevice
+* CheckPoint.snmp.VsxRAID
+* CheckPoint.snmp.VsxMultiDisk
+
+
+zProperties:
+
+* *zVsxCreateDevices* - Whether or not to create Virtual Firewalls (True by default)
+
+
+Devices (Virtual Firewalls)
+===========================
+
+Types of Virtual Devices:
+
+ - Virtual Router (VR)
+ - Virtual Switch (VSW)
+ - Virtual System (VS)
+
+
+Virtual Devices (Virtual Firewalls) are created during Gateway modeling (if *zVsxCreateDevices* set to True)
 
 
 Changelog
