@@ -19,3 +19,5 @@ documents:
         filename: zenpack.yaml
         path: ZenPacks/zenoss/CheckPointMonitor
         type: zenpacklib_yaml
+        options:
+          remove_toc: True

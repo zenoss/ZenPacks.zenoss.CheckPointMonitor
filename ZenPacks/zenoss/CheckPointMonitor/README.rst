@@ -33,6 +33,9 @@ ZenPack provides the following device classes:
 * /Network/Check Point
 * /Network/Check Point/Gaia
 * /Network/Check Point/SPLAT
+* /Network/Check Point/VSX
+* /Network/Check Point/VSX/Gateway
+* /Network/Check Point/VSX/Device
 
 
 Configuring Check Point Firewalls to Allow SNMP Queries
