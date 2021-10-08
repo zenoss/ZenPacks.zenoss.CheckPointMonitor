@@ -1,0 +1,23 @@
+documents:
+  default:
+    outfile: ZenPacks.zenoss.CheckPointMonitor
+    order:
+      - header
+      - body
+      - zenpackyaml
+    sources:
+      header:
+        filename: setup.py
+        type: about
+      body:
+        filename: README.rst
+        path: ZenPacks/zenoss/CheckPointMonitor
+        type: rst
+        options:
+          remove_toc: True
+      zenpackyaml:
+        filename: zenpack.yaml
+        path: ZenPacks/zenoss/CheckPointMonitor
+        type: zenpacklib_yaml
+        options:
+          remove_toc: True
