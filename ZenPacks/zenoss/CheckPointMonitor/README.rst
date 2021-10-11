@@ -36,6 +36,9 @@ ZenPack provides the following device classes:
 * /Network/Check Point
 * /Network/Check Point/Gaia
 * /Network/Check Point/SPLAT
+* /Network/Check Point/VSX
+* /Network/Check Point/VSX/Gateway
+* /Network/Check Point/VSX/Device
 
 
 Configuring Check Point Firewalls to Allow SNMP Queries
@@ -106,9 +109,38 @@ Modeler Plugins:
 * CheckPoint.snmp.VsxMultiDisk
 
 
+zDeviceTemplates:
+
+* Device
+* GatewayDevice
+
+
 zProperties:
 
 * *zVsxCreateDevices* - Whether or not to create Virtual Firewalls (True by default)
+
+
+Components Modeled:
+
+* Multi Disk
+* RAID Volume
+* RAID Disk
+* VSX Device
+
+
+SNMP Based Monitoring Events:
+
+* vsxDeviceTemplate (monitoring template for VSX Device component)
+
+    Monitors High Availability status for Virtual Devices with oid
+
+    =================================  =======================
+    1.3.6.1.4.1.2620.1.16.22.1.1.9      vsxStatusHAState
+    =================================  =======================
+
+    Raises event with eventClass '/Status/VSX/HA' and message
+
+    *"vsxStatusHAState is '{vsxStatusHAState}'"*
 
 
 Devices (Virtual Firewalls)
@@ -122,6 +154,151 @@ Types of Virtual Devices:
 
 
 Virtual Devices (Virtual Firewalls) are created during Gateway modeling (if *zVsxCreateDevices* set to True)
+
+
+zDeviceTemplates:
+
+* VirtualDevice
+* VsHaState
+* VsVpnSiteToSite
+* VsVpnRemoteAccess
+* VsClusterStatus
+* VsUrlFilter
+* VsAppControl
+* VsAntiBotVirus
+* VsIdentityAwareness
+* VsThreatEmulation
+* VsSmartEvent
+
+
+SNMP Based Monitoring Events:
+
+* VsHaState
+
+    Monitors High Availability status for Virtual Devices with oid
+
+    =================================  =======================
+    1.3.6.1.4.1.2620.1.16.22.1.1.9     vsxStatusHAState
+    =================================  =======================
+
+    Raises event with eventClassKey 'VsHA' (mapped to /Status/VSX/HA) and message
+
+    *"HA state is '{vsxStatusHAState}'"*
+
+* VsVpnRemoteAccess
+
+    Monitors Virtual System VPN Remote Access user state with oid
+
+    =================================  =======================
+    1.3.6.1.4.1.2620.500.9000.1.20.0   raUserState
+    =================================  =======================
+
+
+    Events generated from Thresholds
+        * Remote Access User State
+
+    Raises event with eventClass '/Status/VSX/RA'
+
+* VsClusterStatus
+
+    Monitors Virtual System Cluster status with oids
+
+    =================================  =======================
+    1.3.6.1.4.1.2620.1.5.5.0            haStarted
+    1.3.6.1.4.1.2620.1.5.6.0            vsHaState
+    1.3.6.1.4.1.2620.1.5.101.0          haStatCode
+    1.3.6.1.4.1.2620.1.5.102.0          haStatShort
+    =================================  =======================
+
+    Raises 2 events with eventClassKey 'VsCluster' (mapped to /Status/VSX/Cluster) and messages
+
+    1. *"Status code: {haStatCode}; Short description: {haStatShort};"*
+    2. *"Cluster started: {haStarted}; Cluster state: {haState};"*
+
+* VsUrlFilter
+
+    Monitors Virtual System URL Filter status with oids
+
+    =================================  =======================
+    1.3.6.1.4.1.2620.1.43.3.1.0         RADStatusCode
+    1.3.6.1.4.1.2620.1.43.3.2.0         RADStatusDesc
+    1.3.6.1.4.1.2620.1.43.3.101.0       urlFilteringStatus
+    1.3.6.1.4.1.2620.1.43.3.102.0       urlFilteringShort
+    =================================  =======================
+
+    Raises 2 events with eventClassKey 'VsUrlFilter' (mapped to /Status/VSX/URLFilter) and messages
+
+    1. *"Status code: {urlFilteringStatus}; Short description: {urlFilteringShort};"*
+    2. *"RAD status code: {RADStatusCode}; RAD status description: {RADStatusDesc};"*
+
+* VsAppControl
+
+    Monitors Virtual System Application Control status with oids
+
+    =================================  =======================
+    1.3.6.1.4.1.2620.1.39.101.0         appStatusCode
+    1.3.6.1.4.1.2620.1.39.102.0         appShortDesc
+    =================================  =======================
+
+    Raises event with eventClassKey 'VsAppControl' (mapped to /Status/VSX/AppControl) and message
+
+    *"Status code: {appStatusCode}; Short description: {appShortDesc};"*
+
+* VsAntiBotVirus
+
+    Monitors Virtual System Anti-Bot & Anti-Virus status with oids
+
+    =================================  =======================
+    1.3.6.1.4.1.2620.1.46.101.0          amwStatusCode
+    1.3.6.1.4.1.2620.1.46.102.0         amwStatusShortDesc
+    =================================  =======================
+
+    Raises event with eventClassKey 'VsAntiBotVirus' (mapped to /Status/VSX/AMW) and message
+
+    *"Status code: {amwStatusCode}; Short description: {amwStatusShortDesc};"*
+
+* VsIdentityAwareness
+
+    Monitors Virtual System Identity Awareness status with oids
+
+    =================================  =======================
+    1.3.6.1.4.1.2620.1.38.101.0         idaStatus
+    1.3.6.1.4.1.2620.1.38.102.0         idaStatusShortDesc
+    =================================  =======================
+
+    Raises event with eventClassKey 'VsIdentityAwareness' (mapped to /Status/VSX/IDA) and message
+
+    *"Status code: {idaStatus}; Short description: {idaStatusShortDesc};"*
+
+* VsThreatEmulation
+
+    Monitors Virtual System Threat Emulation status with oids
+
+    =================================  =======================
+    1.3.6.1.4.1.2620.1.49.101.0         teStatusCode
+    1.3.6.1.4.1.2620.1.49.102.0         teStatusShortDesc
+    =================================  =======================
+
+    Raises event with eventClassKey 'VsThreatEmulation' (mapped to /Status/VSX/TE) and message
+
+    *"Status code: {teStatusCode}; Short description: {teStatusShortDesc};"*
+
+* VsSmartEvent
+
+    Monitors Virtual System Smart Event status with oids
+
+    =================================  =======================
+    1.3.6.1.4.1.2620.1.25.101.0         cpsemdStatCode
+    1.3.6.1.4.1.2620.1.25.102.0         cpsemdStatShortDescr
+    1.3.6.1.4.1.2620.1.25.1.1           cpsemdProcAlive
+    =================================  =======================
+
+    Raises event with eventClassKey 'VsSmartEvent' (mapped to /Status/VSX/CPSEMD) and message
+
+    *"Status code: {cpsemdStatCode}; Short description: {cpsemdStatShortDescr};"*
+
+    Events generated from Thresholds
+        * CPSEMD Process Status
 
 
 Changelog
