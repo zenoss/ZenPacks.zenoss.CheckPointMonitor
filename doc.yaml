@@ -21,3 +21,4 @@ documents:
         type: zenpacklib_yaml
         options:
           remove_toc: True
+          

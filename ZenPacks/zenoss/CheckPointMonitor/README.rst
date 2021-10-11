@@ -204,10 +204,10 @@ SNMP Based Monitoring Events:
     Monitors Virtual System Cluster status with oids
 
     =================================  =======================
-    1.3.6.1.4.1.2620.1.5.5.0            haStarted
-    1.3.6.1.4.1.2620.1.5.6.0            vsHaState
-    1.3.6.1.4.1.2620.1.5.101.0          haStatCode
-    1.3.6.1.4.1.2620.1.5.102.0          haStatShort
+    1.3.6.1.4.1.2620.1.5.5.0           haStarted
+    1.3.6.1.4.1.2620.1.5.6.0           vsHaState
+    1.3.6.1.4.1.2620.1.5.101.0         haStatCode
+    1.3.6.1.4.1.2620.1.5.102.0         haStatShort
     =================================  =======================
 
     Raises 2 events with eventClassKey 'VsCluster' (mapped to /Status/VSX/Cluster) and messages
@@ -220,10 +220,10 @@ SNMP Based Monitoring Events:
     Monitors Virtual System URL Filter status with oids
 
     =================================  =======================
-    1.3.6.1.4.1.2620.1.43.3.1.0         RADStatusCode
-    1.3.6.1.4.1.2620.1.43.3.2.0         RADStatusDesc
-    1.3.6.1.4.1.2620.1.43.3.101.0       urlFilteringStatus
-    1.3.6.1.4.1.2620.1.43.3.102.0       urlFilteringShort
+    1.3.6.1.4.1.2620.1.43.3.1.0        RADStatusCode
+    1.3.6.1.4.1.2620.1.43.3.2.0        RADStatusDesc
+    1.3.6.1.4.1.2620.1.43.3.101.0      urlFilteringStatus
+    1.3.6.1.4.1.2620.1.43.3.102.0      urlFilteringShort
     =================================  =======================
 
     Raises 2 events with eventClassKey 'VsUrlFilter' (mapped to /Status/VSX/URLFilter) and messages
@@ -236,8 +236,8 @@ SNMP Based Monitoring Events:
     Monitors Virtual System Application Control status with oids
 
     =================================  =======================
-    1.3.6.1.4.1.2620.1.39.101.0         appStatusCode
-    1.3.6.1.4.1.2620.1.39.102.0         appShortDesc
+    1.3.6.1.4.1.2620.1.39.101.0        appStatusCode
+    1.3.6.1.4.1.2620.1.39.102.0        appShortDesc
     =================================  =======================
 
     Raises event with eventClassKey 'VsAppControl' (mapped to /Status/VSX/AppControl) and message
@@ -249,8 +249,8 @@ SNMP Based Monitoring Events:
     Monitors Virtual System Anti-Bot & Anti-Virus status with oids
 
     =================================  =======================
-    1.3.6.1.4.1.2620.1.46.101.0          amwStatusCode
-    1.3.6.1.4.1.2620.1.46.102.0         amwStatusShortDesc
+    1.3.6.1.4.1.2620.1.46.101.0        amwStatusCode
+    1.3.6.1.4.1.2620.1.46.102.0        amwStatusShortDesc
     =================================  =======================
 
     Raises event with eventClassKey 'VsAntiBotVirus' (mapped to /Status/VSX/AMW) and message
@@ -262,8 +262,8 @@ SNMP Based Monitoring Events:
     Monitors Virtual System Identity Awareness status with oids
 
     =================================  =======================
-    1.3.6.1.4.1.2620.1.38.101.0         idaStatus
-    1.3.6.1.4.1.2620.1.38.102.0         idaStatusShortDesc
+    1.3.6.1.4.1.2620.1.38.101.0        idaStatus
+    1.3.6.1.4.1.2620.1.38.102.0        idaStatusShortDesc
     =================================  =======================
 
     Raises event with eventClassKey 'VsIdentityAwareness' (mapped to /Status/VSX/IDA) and message
@@ -275,8 +275,8 @@ SNMP Based Monitoring Events:
     Monitors Virtual System Threat Emulation status with oids
 
     =================================  =======================
-    1.3.6.1.4.1.2620.1.49.101.0         teStatusCode
-    1.3.6.1.4.1.2620.1.49.102.0         teStatusShortDesc
+    1.3.6.1.4.1.2620.1.49.101.0        teStatusCode
+    1.3.6.1.4.1.2620.1.49.102.0        teStatusShortDesc
     =================================  =======================
 
     Raises event with eventClassKey 'VsThreatEmulation' (mapped to /Status/VSX/TE) and message
@@ -288,9 +288,9 @@ SNMP Based Monitoring Events:
     Monitors Virtual System Smart Event status with oids
 
     =================================  =======================
-    1.3.6.1.4.1.2620.1.25.101.0         cpsemdStatCode
-    1.3.6.1.4.1.2620.1.25.102.0         cpsemdStatShortDescr
-    1.3.6.1.4.1.2620.1.25.1.1           cpsemdProcAlive
+    1.3.6.1.4.1.2620.1.25.101.0        cpsemdStatCode
+    1.3.6.1.4.1.2620.1.25.102.0        cpsemdStatShortDescr
+    1.3.6.1.4.1.2620.1.25.1.1          cpsemdProcAlive
     =================================  =======================
 
     Raises event with eventClassKey 'VsSmartEvent' (mapped to /Status/VSX/CPSEMD) and message
