@@ -135,7 +135,9 @@ SNMP Based Monitoring Events:
     Monitors High Availability status for Virtual Devices with oid
 
     =================================  =======================
-    1.3.6.1.4.1.2620.1.16.22.1.1.9      vsxStatusHAState
+    OID                                Name
+    =================================  =======================
+    1.3.6.1.4.1.2620.1.16.22.1.1.9     vsxStatusHAState
     =================================  =======================
 
     Raises event with eventClass '/Status/VSX/HA' and message
@@ -178,6 +180,8 @@ SNMP Based Monitoring Events:
     Monitors High Availability status for Virtual Devices with oid
 
     =================================  =======================
+    OID                                Name
+    =================================  =======================
     1.3.6.1.4.1.2620.1.16.22.1.1.9     vsxStatusHAState
     =================================  =======================
 
@@ -189,6 +193,8 @@ SNMP Based Monitoring Events:
 
     Monitors Virtual System VPN Remote Access user state with oid
 
+    =================================  =======================
+    OID                                Name
     =================================  =======================
     1.3.6.1.4.1.2620.500.9000.1.20.0   raUserState
     =================================  =======================
@@ -203,6 +209,8 @@ SNMP Based Monitoring Events:
 
     Monitors Virtual System Cluster status with oids
 
+    =================================  =======================
+    OID                                Name
     =================================  =======================
     1.3.6.1.4.1.2620.1.5.5.0           haStarted
     1.3.6.1.4.1.2620.1.5.6.0           vsHaState
@@ -220,6 +228,8 @@ SNMP Based Monitoring Events:
     Monitors Virtual System URL Filter status with oids
 
     =================================  =======================
+    OID                                Name
+    =================================  =======================
     1.3.6.1.4.1.2620.1.43.3.1.0        RADStatusCode
     1.3.6.1.4.1.2620.1.43.3.2.0        RADStatusDesc
     1.3.6.1.4.1.2620.1.43.3.101.0      urlFilteringStatus
@@ -236,6 +246,8 @@ SNMP Based Monitoring Events:
     Monitors Virtual System Application Control status with oids
 
     =================================  =======================
+    OID                                Name
+    =================================  =======================
     1.3.6.1.4.1.2620.1.39.101.0        appStatusCode
     1.3.6.1.4.1.2620.1.39.102.0        appShortDesc
     =================================  =======================
@@ -248,6 +260,8 @@ SNMP Based Monitoring Events:
 
     Monitors Virtual System Anti-Bot & Anti-Virus status with oids
 
+    =================================  =======================
+    OID                                Name
     =================================  =======================
     1.3.6.1.4.1.2620.1.46.101.0        amwStatusCode
     1.3.6.1.4.1.2620.1.46.102.0        amwStatusShortDesc
@@ -262,6 +276,8 @@ SNMP Based Monitoring Events:
     Monitors Virtual System Identity Awareness status with oids
 
     =================================  =======================
+    OID                                Name
+    =================================  =======================
     1.3.6.1.4.1.2620.1.38.101.0        idaStatus
     1.3.6.1.4.1.2620.1.38.102.0        idaStatusShortDesc
     =================================  =======================
@@ -275,6 +291,8 @@ SNMP Based Monitoring Events:
     Monitors Virtual System Threat Emulation status with oids
 
     =================================  =======================
+    OID                                Name
+    =================================  =======================
     1.3.6.1.4.1.2620.1.49.101.0        teStatusCode
     1.3.6.1.4.1.2620.1.49.102.0        teStatusShortDesc
     =================================  =======================
@@ -287,6 +305,8 @@ SNMP Based Monitoring Events:
 
     Monitors Virtual System Smart Event status with oids
 
+    =================================  =======================
+    OID                                Name
     =================================  =======================
     1.3.6.1.4.1.2620.1.25.101.0        cpsemdStatCode
     1.3.6.1.4.1.2620.1.25.102.0        cpsemdStatShortDescr
