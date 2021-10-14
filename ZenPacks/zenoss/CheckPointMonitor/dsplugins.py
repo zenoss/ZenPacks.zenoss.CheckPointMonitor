@@ -31,7 +31,30 @@ class VsxSnmpPlugin(PythonSnmpDataSourcePlugin):
         return super(VsxSnmpPlugin, self).collect(config, connInfoOverrides)
 
 
-class HaStateSnmp(VsxSnmpPlugin):
+class Vs0ContextSnmpPlugin(PythonSnmpDataSourcePlugin):
+    """
+    Datasource plugin for monitoring VSX OID Branch 1.3.6.1.4.1.2620.1.16
+
+    This OID Branch is available only in the context of the VSX Gateway (VS0) (zSnmpContext = '')
+    """
+
+    proxy_attributes = PythonSnmpDataSourcePlugin.proxy_attributes + ('devGatewayIp',)
+
+    def collect(self, config, connInfoOverrides=None):
+        """Override due to SNMP queries must be sent to the IP address of VSX Gateway"""
+
+        ds0 = config.datasources[0]
+
+        connInfoOverrides = {
+            'manageIp': ds0.devGatewayIp,
+            'zSnmpContext': ''
+        }
+
+        # call the parent collect with our custom connectionInfo
+        return super(Vs0ContextSnmpPlugin, self).collect(config, connInfoOverrides)
+
+
+class HaStateSnmp(Vs0ContextSnmpPlugin):
     """Datasource plugin for monitoring Virtual System - HA State"""
 
     dsName = 'HA'
