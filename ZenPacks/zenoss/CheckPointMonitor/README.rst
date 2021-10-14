@@ -321,6 +321,20 @@ SNMP Based Monitoring Events:
         * CPSEMD Process Status
 
 
+SNMP VS Mode Notes
+------------------
+
+* Check Point VSX OID Branch 1.3.6.1.4.1.2620.1.16 is available only in the context of VS0. The SNMP response contains the data from all configured Virtual Devices [Limitation ID 01453316].
+
+* SNMP OIDs other than VSX OID Branch 1.3.6.1.4.1.2620.1.16 can be queried per Virtual Device. The SNMP response contains the data only from the specific queried Virtual Device.
+
+* Only SNMP daemon running in the context of VS0 supports SNMP traps.
+
+* To query specific Virtual Device (not VS0), use SNMP v3 and specify the required Virtual Device context in the following format:
+
+    `[Expert@HostName:0]# snmpwalk -v3 -u SNMPv3_USER -l <authNoPriv | authPriv> -A PASSPHRASE -n vsid<VSID_NUMBER> <IP_ADDRESS_OF_VSX_GATEWAY_ITSELF> <OID>`
+
+
 Changelog
 ---------
 
