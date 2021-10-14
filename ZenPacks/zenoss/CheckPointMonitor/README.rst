@@ -13,7 +13,7 @@ With this ZenPack, you can ensure that the firewall module has a policy installe
 HA is in a proper state, and that the policy server (for SecureClient) is running.
 
 Starting from 3.0.0 version the ZenPacks.zenoss.CheckPointMonitor includes the new SNMP structures for Virtual Firewalls
-to support the CheckPoint R80.30 version. For modeling/monitoring VSX devices SNMP v3 and SNMP VS Mode were used.
+to support the CheckPoint R80.30 version. For modeling/monitoring VSX devices SNMP v3 and SNMP Virtual System (VS) Mode were used.
 
 
 Prerequisites
@@ -321,10 +321,10 @@ SNMP Based Monitoring Events:
         * CPSEMD Process Status
 
 
-SNMP VS Mode Notes
+SNMP Virtual System (VS) Mode Notes
 ------------------
 
-* Check Point VSX OID Branch 1.3.6.1.4.1.2620.1.16 is available only in the context of VS0. The SNMP response contains the data from all configured Virtual Devices [Limitation ID 01453316].
+* Check Point VSX OID Branch 1.3.6.1.4.1.2620.1.16 is available only in the context of the VSX Gateway (VS0). The SNMP response contains the data from all configured Virtual Devices [Limitation ID 01453316].
 
 * SNMP OIDs other than VSX OID Branch 1.3.6.1.4.1.2620.1.16 can be queried per Virtual Device. The SNMP response contains the data only from the specific queried Virtual Device.
 

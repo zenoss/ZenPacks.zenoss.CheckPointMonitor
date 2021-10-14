@@ -35,7 +35,7 @@ class Vs0ContextSnmpPlugin(PythonSnmpDataSourcePlugin):
     """
     Datasource plugin for monitoring VSX OID Branch 1.3.6.1.4.1.2620.1.16
 
-    This OID Branch is available only in the context of VS0 (zSnmpContext = '')
+    This OID Branch is available only in the context of the VSX Gateway (VS0) (zSnmpContext = '')
     """
 
     proxy_attributes = PythonSnmpDataSourcePlugin.proxy_attributes + ('devGatewayIp',)
