@@ -338,6 +338,18 @@ SNMP Virtual System (VS) Mode Notes
 Changelog
 ---------
 
+3.0.0
+
+Features:
+
+  * convert ZP to ZPL (SVC-2986)
+  * convert to standardized datasources
+  * add appropriate clear events
+  * add support for VSX
+  * High Availability state monitoring
+  * improved documentation
+
+
 2.0.1
 
     * Released on 2016/09/06
