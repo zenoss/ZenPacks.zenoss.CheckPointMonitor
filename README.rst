@@ -1,0 +1,1 @@
+ZenPacks/zenoss/CheckPointMonitor/README.rst

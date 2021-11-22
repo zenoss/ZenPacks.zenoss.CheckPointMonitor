@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2008, 2014, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2008, 2014, 2021 all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -9,9 +9,6 @@
 
 from copy import deepcopy
 
-from Globals import InitializeClass
-
-from Products.ZenModel.Device import Device
 from Products.ZenModel.ZenossSecurity import ZEN_VIEW
 from Products.Zuul import getFacade
 
@@ -20,73 +17,15 @@ from zenoss.protocols.protobufs.zep_pb2 import (
     SEVERITY_CRITICAL, SEVERITY_ERROR, SEVERITY_WARNING,
     )
 
+from . import schema as schema
+from .jobs import VsxDeviceJob
 
-class CheckPointDevice(Device):
-    "A Check Point firewall"
 
-    fwModuleState = ""
 
-    fwVerMajor = None
-    fwVerMinor = None
-    fwPolicyName = ""
-    fwInstallTime = ""
+class CheckPointDevice(schema.CheckPointDevice):
+    """A Check Point firewall"""
 
-    cpvVerMajor = None
-    cpvVerMinor = None
-
-    haInstalled = None
-    haVerMajor = None
-    haVerMinor = None
-    haStarted = None
-    haState = ""
-
-    memTotalReal = None
-    memTotalVirtual = None
-
-    svnVersion = ""
-
-    osName = ""
-    osMajorVer = None
-    osMinorVer = None
-    osVersionLevel = ""
-
-    dtpsVerMajor = None
-    dtpsVerMinor = None
-    dtpsLicensedUsers = None
-
-    _properties = Device._properties + (
-        {'id': 'fwModuleState', 'type': 'string', 'mode': 'w'},
-
-        {'id': 'fwVerMajor', 'type': 'string', 'mode': 'w'},
-        {'id': 'fwVerMinor', 'type': 'string', 'mode': 'w'},
-        {'id': 'fwPolicyName', 'type': 'string', 'mode': 'w'},
-        {'id': 'fwInstallTime', 'type': 'string', 'mode': 'w'},
-
-        {'id': 'cpvVerMajor', 'type': 'string', 'mode': 'w'},
-        {'id': 'cpvVerMinor', 'type': 'string', 'mode': 'w'},
-
-        {'id': 'haInstalled', 'type': 'string', 'mode': 'w'},
-        {'id': 'haVerMajor', 'type': 'string', 'mode': 'w'},
-        {'id': 'haVerMinor', 'type': 'string', 'mode': 'w'},
-        {'id': 'haStarted', 'type': 'string', 'mode': 'w'},
-        {'id': 'haState', 'type': 'string', 'mode': 'w'},
-
-        {'id': 'memTotalReal', 'type': 'int', 'mode': 'w'},
-        {'id': 'memTotalVirtual', 'type': 'int', 'mode': 'w'},
-
-        {'id': 'svnVersion', 'type': 'string', 'mode': 'w'},
-
-        {'id': 'osName', 'type': 'string', 'mode': 'w'},
-        {'id': 'osMajorVer', 'type': 'int', 'mode': 'w'},
-        {'id': 'osMinorVer', 'type': 'int', 'mode': 'w'},
-        {'id': 'osVersionLevel', 'type': 'string', 'mode': 'w'},
-
-        {'id': 'dtpsVerMajor', 'type': 'string', 'mode': 'w'},
-        {'id': 'dtpsVerMinor', 'type': 'string', 'mode': 'w'},
-        {'id': 'dtpsLicensedUsers', 'type': 'string', 'mode': 'w'},
-        )
-
-    factory_type_information = deepcopy(Device.factory_type_information)
+    factory_type_information = deepcopy(schema.CheckPointDevice.factory_type_information)
     custom_actions = []
     custom_actions.extend(factory_type_information[0]['actions'])
     custom_actions.insert(2, {
@@ -171,5 +110,17 @@ class CheckPointDevice(Device):
 
         return summaries['total']
 
+    def setDevices(self, vsxDevices):
+        """
+        Creates managed devices under /Network/Check Point/VSX/Device device class.
+        """
+        if vsxDevices:
+            self.dmd.JobManager.addJob(
+                VsxDeviceJob,
+                description="Creating virtual devices for VSX Gateway %s" % self.id,
+                kwargs={
+                    "vsxGatewayID": self.id,
+                    "vsxDevices": vsxDevices,
+                }
+            )
 
-InitializeClass(CheckPointDevice)

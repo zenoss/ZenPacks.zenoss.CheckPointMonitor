@@ -1,0 +1,1384 @@
+name: ZenPacks.zenoss.CheckPointMonitor
+
+zProperties:
+  zVsxCreateDevices:
+    type: boolean
+    default: true
+    label: Create VSX devices?
+    description: Whether or not to create VSX devices.
+
+classes:
+  CheckPointDevice:
+    base: [zenpacklib.Device]
+    label: Check Point Firewall
+    properties:
+      fwModuleState:
+        type: string
+        default: ""
+
+      fwVerMajor: {}
+      fwVerMinor: {}
+      fwPolicyName:
+        default: ""
+      fwInstallTime:
+        default: ""
+
+      cpvVerMajor: {}
+      cpvVerMinor: {}
+
+      haInstalled: {}
+      haVerMajor: {}
+      haVerMinor: {}
+      haStarted: {}
+      haState:
+        default: ""
+
+      memTotalReal:
+        type: int
+      memTotalVirtual:
+        type: int
+
+      svnVersion:
+        default: ""
+
+      osName:
+        default: ""
+      osMajorVer:
+        type: int
+      osMinorVer:
+        type: int
+      osVersionLevel:
+        default: ""
+
+      dtpsVerMajor: {}
+      dtpsVerMinor: {}
+      dtpsLicensedUsers: {}
+
+  GatewayDevice:
+    base: [CheckPointDevice]
+    label: VSX Gateway
+
+  VirtualDevice:
+    base: [zenpacklib.Device]
+    label: Check Point VSX Device
+    properties:
+      devGatewayIp:
+        label: VSX Gateway IP
+
+  VsxDevice:
+    base: [ zenpacklib.Component ]
+    label: VSX Device
+    properties:
+      vsType:
+        label: VS Type
+      vsMainIP:
+        label: Main IP
+      vsPolicyName:
+        label: Policy Name
+      vsPolicyType:
+        label: Policy Type
+    monitoring_templates:
+      - vsxDeviceTemplate
+
+  VsxRAIDVolume:
+    base: [ zenpacklib.Component ]
+    label: RAID Volume
+    properties:
+      raidVolumeIndex:
+        label: Volume Index
+        grid_display: False
+      raidVolumeID:
+        label: Volume ID
+        grid_display: False
+      raidVolumeType:
+        label: Type
+      numOfDisksOnRaid:
+        label: Number Of Disks on the RAID
+        grid_display: False
+      raidVolumeMaxLBA:
+        label: Raid maximum number of Logical Block Addressing
+        grid_display: False
+      raidVolumeSize:
+        label: Size
+        renderer: Zenoss.render.bytesString
+      raidVolumeState:
+        label: Volume State
+        datapoint: raidVolumeState_raidVolumeState
+        enum:
+          0: "OPTIMAL"
+          1: "DEGRADED"
+          2: "FAILED"
+          -1: "UNKNOWN"
+        datapoint_default: -1
+      raidVolumeFlags:
+        label: Volume Flags
+        datapoint: raidVolumeFlags_raidVolumeFlags
+        enum:
+          1: "ENABLED"
+          2: "QUIESCED"
+          4: "RESYNC_IN_PROGRESS"
+          8: "VOLUME_INACTIVE"
+          16: "NOT_CONFIGURED"
+          32: "USING_INTERIM_RECOVERY_MODE"
+          64: "READY_FOR_RECOVERY_OPERATION"
+          128: "WRONG_PHYSICAL_DRIVE_WAS_REPLACED"
+          256: "A_PHYSICAL_DRIVE_IS_NOT_PROPERLY_CONNECTED"
+          512: "HARDWARE_IS_OVER_HEATING"
+          1024: "HARDWARE_WAS_OVERHEATED"
+          2048: "CURRENTLY_EXPENDING"
+          4096: "NOT_YET_AVAILABLE"
+          8192: "QUEUED_FOR_EXPENSION"
+          16384: "MIGRATING"
+          32768: "IMPACTED"
+          65536: "OFFLINE"
+          131072: "CLEARING"
+          0: "NONE"
+        datapoint_default: 0
+    monitoring_templates:
+      - vsxRAIDVolumeTemplate
+
+  VsxRAIDDisk:
+    base: [ zenpacklib.Component ]
+    label: RAID Disk
+    properties:
+      raidDiskIndex:
+        label: Disk Index
+        grid_display: False
+      raidDiskID:
+        label: Disk ID
+        grid_display: False
+      raidDiskNumber:
+        label: Disk Number
+      raidDiskVendor:
+        label: Vendor
+      raidDiskProductID:
+        label: Product ID
+      raidDiskRevision:
+        label: Revision
+      raidDiskMaxLBA:
+        label: Disk maximum number of Logical Block Addressing
+        grid_display: False
+      raidDiskSize:
+        label: Size
+        renderer: Zenoss.render.bytesString
+      raidDiskState:
+        label: Disk State
+        datapoint: raidDiskState_raidDiskState
+        enum:
+          0: "ONLINE"
+          1: "MISSING"
+          2: "NOT_COMPATIBLE"
+          3: "DISC_FAILED"
+          4: "INITIALIZING"
+          5: "OFFLINE_REQUESTED"
+          6: "FAILED_REQUESTED"
+          7: "UNCONFIGURED_GOOD_SPUN_UP"
+          8: "UNCONFIGURED_GOOD_SPUN_DOWN"
+          9: "UNCONFIGURED_BAD"
+          10: "HOTSPARE"
+          11: "DRIVE_OFFLINE"
+          12: "REBUILD"
+          13: "FAILED"
+          15: "COPYBACK"
+          255: "OTHER_OFFLINE"
+          -1: "UNKNOWN"
+        datapoint_default: -1
+      raidDiskFlags:
+        label: Disk Flags
+        datapoint: raidDiskState_raidDiskState
+        enum:
+          1: "OUT_OF_SYNC"
+          2: "QUIESCED"
+          4: "VERIFYING"
+          8: "READY"
+          -1: "NONE"
+        datapoint_default: -1
+    monitoring_templates:
+      - vsxRAIDDiskTemplate
+
+  VsxMultiDisk:
+    base: [ zenpacklib.Component ]
+    label: Multi Disk
+    properties:
+      multiDiskIndex:
+        label: Disk Index
+        grid_display: False
+      multiDiskSize:
+        label: Total Size
+        renderer: Zenoss.render.bytesString
+    monitoring_templates:
+      - vsxMultiDiskTemplate
+
+device_classes:
+  DEFAULTS:
+    remove: true
+    zProperties:
+      zSnmpMonitorIgnore: false
+      zPingMonitorIgnore: true
+
+  /Network/Check Point:
+    zProperties:
+      zPythonClass: ZenPacks.zenoss.CheckPointMonitor.CheckPointDevice
+      zCollectorPlugins:
+        - zenoss.snmp.DeviceMap
+        - zenoss.snmp.InterfaceMap
+        - zenoss.snmp.NewDeviceMap
+        - zenoss.snmp.RouteMap
+        - CheckPoint.DeviceMap
+      zDeviceTemplates:
+        - Device
+        - CheckPointDevice
+    templates:
+      FileSystem:
+        description: Filesystem template that uses HOST-RESOURCES mib. Has 95% threshold
+        targetPythonClass: Products.ZenModel.FileSystem
+        datasources:
+          usedBlocks:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.2.1.25.2.3.1.6
+            datapoints:
+              usedBlocks:
+                aliases: {
+                  fs__pct: '${here/getTotalBlocks},/,100,*',
+                  usedFilesystemSpace__bytes: '${here/blockSize},*'
+                }
+        thresholds:
+          low disk:
+            eventClass: /Perf/Filesystem
+            severity: 5
+            dsnames: [usedBlocks_usedBlocks]
+            maxval: here.getTotalBlocks() * .95
+        graphs:
+          Utilization:
+            height: 100
+            units: percentage
+            miny: 0
+            maxy: 100
+            graphpoints:
+              low disk:
+                type: ThresholdGraphPoint
+                threshId: low disk
+                legend: ${graphPoint/id}
+              usedBlocks:
+                dpName: usedBlocks_usedBlocks
+                lineType: AREA
+                format: '%6.2lf%%'
+                legend: Used
+                rpn: ${here/getTotalBlocks},/,100,*
+      CheckPointDevice:
+        description: Device metrics for Check Point firewalls.
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.CheckPointDevice
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            eventClass: /Cmd/Fail
+          diskPercent:
+            # Percent of free space.
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.6.7.3.3.0
+            datapoints:
+              diskPercent:
+                rrdmax: 100
+                aliases: {fs__pct}
+          dtpsConnectedUsers:
+            # Connected users.
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.9.5.0
+            datapoints:
+              dtpsConnectedUsers: {}
+          dtpsState:
+            # Checks to verify that the policy server (for SecureClient) is running.
+            type: SNMP String Status DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.SnmpStringStatusDataSource.SnmpStringStatusDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.9.102.0
+            eventClass: /Status/VPN
+            severity: 4
+            cycletime: 60
+            resultSeverityMap:
+              'Down': 4
+              'down': 4
+              'Up': 0
+              'up': 0
+          fwAccepted:
+            # The number of accepted packets.
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.1.4.0
+            datapoints:
+              fwAccepted:
+                rrdtype: DERIVE
+          fwDropped:
+            # The number of dropped packets.
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.1.6.0
+            datapoints:
+              fwDropped:
+                rrdtype: DERIVE
+          fwLogged:
+            # The number of logged packets.
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.1.7.0
+            datapoints:
+              fwLogged:
+                rrdtype: DERIVE
+          fwNumConn:
+            # Number of connections.
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.1.25.3.0
+            datapoints:
+              fwNumConn: {}
+          fwPeakNumConn:
+            # Peak number of connections.
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.1.25.4.0
+            datapoints:
+              fwPeakNumConn: {}
+          fwRejected:
+            # The number of rejected packets.
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.1.5.0
+            datapoints:
+              fwRejected:
+                rrdtype: DERIVE
+          fwState:
+            # Checks to verify that the firewall module currently has a policy installed.
+            type: SNMP String Status DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.SnmpStringStatusDataSource.SnmpStringStatusDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.1.1.0
+            eventClass: /Status/Firewall
+            severity: 5
+            cycletime: 60
+            resultSeverityMap:
+              'Installed': 0
+              'installed': 0
+          haState:
+            # Checks to verify that HA is in a proper state.
+            type: SNMP String Status DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.SnmpStringStatusDataSource.SnmpStringStatusDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.5.6.0
+            eventClass: /Status/HA
+            severity: 4
+            cycletime: 60
+            resultSeverityMap:
+              'active': 0
+              'standby': 0
+              'stand-by': 0
+              'not active': 4
+          memActiveReal:
+            # Active real memory (32 bit)
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.6.7.1.4.0
+            datapoints:
+              memActiveReal:
+                aliases: {
+                  mem__pct: '${here/hw/totalMemory},/,100,*',
+                  memoryAvailable__bytes: '${here/hw/totalMemory},EXC,-',
+                  memoryUsed__pct: '${here/hw/totalMemory},/,100,*'
+                }
+          memActiveVirtual:
+            # Active virtual memory (32 bit)
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.6.7.1.2.0
+            datapoints:
+              memActiveVirtual: {}
+          procSysTime:
+            # Processor system time.
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.2.0
+            datapoints:
+              procSysTime:
+                rrdmax: 100
+          procUsage:
+            # Processor usage.
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.4.0
+            datapoints:
+              procUsage:
+                rrdmax: 100
+                aliases: {cpu__pct}
+          procUsrTime:
+            # Processor user time.
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.1.0
+            datapoints:
+              procUsrTime:
+                rrdmax: 100
+        thresholds:
+          DEFAULTS:
+            escalateCount: 0
+          CPU utilization:
+            # This threshold monitors the value for the procUsage_procUsage DataPoint and when the value for gets above the default percentage value of 95 an event is sent.
+            eventClass: /Perf/CPU
+            dsnames: [procUsage_procUsage]
+            maxval: 95
+          disk utilization:
+            # This threshold monitors the value for the diskPercent_diskPercent DataPoint and when the value is above the default percentage value of 95 an event is sent.
+            eventClass: /Perf/Filesystem
+            dsnames: [diskPercent_diskPercent]
+            maxval: 95
+          licensed users:
+            # This threshold monitors the value for the dtpsConnectedUsers_dtpsConnectedUsers DataPoint and when the value gets above the default percentage value an event is sent.
+            eventClass: /License
+            dsnames: [dtpsConnectedUsers_dtpsConnectedUsers]
+            maxval: max(0, (here.dtpsLicensedUsers or 0) - 5)
+          memory utilization:
+            # This threshold monitors the value for the memActiveReal_memActiveReal DataPoint and when the value gets above the default percentage value of 90 an event is sent.
+            eventClass: /Perf/Memory
+            dsnames: [memActiveReal_memActiveReal]
+            maxval: here.hw.totalMemory * .9
+          swap utilization:
+            # This threshold monitors the value for the memActiveVirtual_memActiveVirtual DataPoint and when the value gets above the default percentage value of 50 an event is sent.
+            eventClass: /Perf/Memory
+            dsnames: [memActiveVirtual_memActiveVirtual]
+            maxval: here.os.totalSwap * .5
+        graphs:
+          DEFAULTS:
+            height: 100
+            miny: 0
+          CPU Utilization:
+            units: percent
+            miny: 0
+            maxy: 100
+            graphpoints:
+              CPU utilization:
+                sequence: 0
+                type: ThresholdGraphPoint
+                threshId: CPU utilization
+                legend: ${graphPoint/id}
+              procSysTime:
+                sequence: 1
+                lineType: AREA
+                stacked: true
+                format: '%5.1lf%%'
+                legend: System
+                dpName: procSysTime_procSysTime
+              procUsrTime:
+                sequence: 2
+                lineType: AREA
+                stacked: true
+                format: '%5.1lf%%'
+                legend: User
+                dpName: procUsrTime_procUsrTime
+          Disk Utilization:
+            units: percent
+            maxy: 100
+            graphpoints:
+              disk utilization:
+                sequence: 0
+                type: ThresholdGraphPoint
+                threshId: disk utilization
+                legend: ${graphPoint/id}
+              diskPercent:
+                sequence: 1
+                lineType: AREA
+                format: '%5.1lf%%'
+                legend: Used
+                dpName: diskPercent_diskPercent
+          Firewall - Packet Handling:
+            units: packets/sec
+            graphpoints:
+              fwAccepted:
+                sequence: 0
+                legend: Accepted
+                dpName: fwAccepted_fwAccepted
+                lineType: AREA
+                stacked: true
+              fwDropped:
+                sequence: 2
+                legend: Dropped
+                dpName: fwDropped_fwDropped
+                lineType: AREA
+                stacked: true
+              fwLogged:
+                sequence: 3
+                legend: Logged
+                dpName: fwLogged_fwLogged
+                lineType: AREA
+                stacked: true
+              fwRejected:
+                sequence: 1
+                legend: Rejected
+                dpName: fwRejected_fwRejected
+                lineType: AREA
+                stacked: true
+          Firewall - Simultaneous Connections:
+            units: connections
+            graphpoints:
+              fwNumConn:
+                sequence: 0
+                lineType: AREA
+                legend: Active
+                dpName: fwNumConn_fwNumConn
+                format: '%6.0lf'
+              fwPeakNumConn:
+                sequence: 1
+                legend: Peak
+                dpName: fwPeakNumConn_fwPeakNumConn
+                format: '%6.0lf'
+          Memory Utilization:
+            units: percent
+            maxy: 100
+            graphpoints:
+              memActiveReal:
+                sequence: 2
+                lineType: AREA
+                format: '%5.1lf%%'
+                legend: Memory
+                rpn: ${here/hw/totalMemory},/,100,*
+                dpName: memActiveReal_memActiveReal
+              memActiveVirtual:
+                sequence: 3
+                lineWidth: 2
+                format: '%5.1lf%%'
+                legend: Swap
+                rpn: ${here/os/totalSwap},/,100,*
+                dpName: memActiveVirtual_memActiveVirtual
+              memory utilization:
+                sequence: 1
+                type: ThresholdGraphPoint
+                threshId: memory utilization
+                legend: ${graphPoint/id}
+              swap utilization:
+                sequence: 0
+                type: ThresholdGraphPoint
+                threshId: swap utilization
+                legend: ${graphPoint/id}
+          Policy Server - Users:
+            units: users
+            graphpoints:
+              dtpsConnectedUsers:
+                sequence: 1
+                lineType: AREA
+                format: '%5.0lf'
+                legend: Connected
+                dpName: dtpsConnectedUsers_dtpsConnectedUsers
+              licensed users:
+                sequence: 0
+                type: ThresholdGraphPoint
+                threshId: licensed users
+                legend: ${graphPoint/id}
+
+  /Network/Check Point/Gaia:
+    zProperties:
+      zCollectorPlugins:
+        - zenoss.snmp.CpuMap
+        - zenoss.snmp.DeviceMap
+        - zenoss.snmp.HRFileSystemMap
+        - zenoss.snmp.HRSWRunMap
+        - zenoss.snmp.InterfaceMap
+        - zenoss.snmp.IpServiceMap
+        - zenoss.snmp.NewDeviceMap
+        - CheckPoint.DeviceMap
+
+  /Network/Check Point/SPLAT:
+    zProperties:
+      zCollectorPlugins:
+        - zenoss.snmp.CpuMap
+        - zenoss.snmp.DeviceMap
+        - zenoss.snmp.HRFileSystemMap
+        - zenoss.snmp.HRSWInstalledMap
+        - zenoss.snmp.HRSWRunMap
+        - zenoss.snmp.InterfaceMap
+        - zenoss.snmp.IpServiceMap
+        - zenoss.snmp.NewDeviceMap
+        - zenoss.snmp.RouteMap
+        - zenoss.snmp.UCDHardDiskMap
+        - CheckPoint.DeviceMap
+
+  /Network/Check Point/VSX/Gateway:
+    zProperties:
+      zPythonClass: ZenPacks.zenoss.CheckPointMonitor.GatewayDevice
+      zCollectorPlugins:
+        - CheckPoint.DeviceMap
+        - CheckPoint.snmp.VsxDevice
+        - CheckPoint.snmp.VsxRAID
+        - CheckPoint.snmp.VsxMultiDisk
+      zDeviceTemplates:
+        - Device
+        - GatewayDevice
+    templates:
+      GatewayDevice:
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.GatewayDevice
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+          ### Memory ###
+          memTotalReal64:
+            # Total real memory in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.4.3.0
+            datapoints:
+              memTotalReal64: {}
+          memActiveReal64:
+            # Active real memory in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.4.4.0
+            datapoints:
+              memActiveReal64: {}
+          memFreeReal64:
+            # Free memory in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.4.5.0
+            datapoints:
+              memFreeReal64: {}
+          memTotalVirtual64:
+            # Total virtual memory in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.4.1.0
+            datapoints:
+              memTotalVirtual64: {}
+          memActiveVirtual64:
+            # Active virtual memory in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.4.2.0
+            datapoints:
+              memActiveVirtual64: {}
+          ### CPU ###
+          vsxProcUsage:
+            # Percentage of CPU utilization - Overall
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.4.0
+            datapoints:
+              vsxProcUsage: {}
+          vsxProcUsrTime:
+            # Percentage of CPU utilization for user mode processes - Overall
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.1.0
+            datapoints:
+              vsxProcUsrTime: {}
+          vsxProcSysTime:
+            # Percentage of CPU utilization for kernel mode processes - Overall
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.2.0
+            datapoints:
+              vsxProcSysTime: {}
+          vsxProcIdleTime:
+            # Percentage of CPU idle time - Overall
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.3.0
+            datapoints:
+              vsxProcIdleTime: {}
+          procInterrupts:
+            # Number of CPU interrupts per second - Overall
+            oid: 1.3.6.1.4.1.2620.1.6.7.2.6.0
+            datapoints:
+              procInterrupts: {}
+          ### Disk ###
+          vsxDiskPercent:
+            # Percent of free space
+            oid: 1.3.6.1.4.1.2620.1.6.7.3.3.0
+            datapoints:
+              vsxDiskPercent: {}
+        graphs:
+          Memory:
+            base: true
+            units: bytes
+            graphpoints:
+              memActiveReal64:
+                legend: Active real
+                dpName: memActiveReal64_memActiveReal64
+              memFreeReal64:
+                legend: Free real
+                dpName: memFreeReal64_memFreeReal64
+              memTotalReal64:
+                legend: Total real
+                dpName: memTotalReal64_memTotalReal64
+              memActiveVirtual64:
+                legend: Active virtual
+                dpName: memActiveVirtual64_memActiveVirtual64
+              memTotalVirtual64:
+                legend: Total virtual
+                dpName: memTotalVirtual64_memTotalVirtual64
+          Memory Utilization:
+            units: percent
+            miny: 0
+            maxy: 100
+            graphpoints:
+              memActiveRealUtil:
+                lineType: AREA
+                stacked: true
+                format: '%5.1lf%%'
+                legend: Memory
+                rpn: ${here/hw/totalMemory},/,100,*
+                dpName: memActiveReal64_memActiveReal64
+              memActiveVirtualUtil:
+                lineType: AREA
+                stacked: true
+                format: '%5.1lf%%'
+                legend: Swap
+                rpn: ${here/os/totalSwap},/,100,*
+                dpName: memActiveVirtual64_memActiveVirtual64
+          CPU Utilization:
+            units: percent
+            miny: 0
+            maxy: 100
+            graphpoints:
+              procUsage:
+                format: '%5.1lf%%'
+                legend: CPU usage
+                dpName: vsxProcUsage_vsxProcUsage
+              procUsrTime:
+                format: '%5.1lf%%'
+                legend: User Time
+                dpName: vsxProcUsrTime_vsxProcUsrTime
+              procSysTime:
+                format: '%5.1lf%%'
+                legend: System Time
+                dpName: vsxProcSysTime_vsxProcSysTime
+              procIdleTime:
+                format: '%5.1lf%%'
+                legend: Idle Time
+                dpName: vsxProcIdleTime_vsxProcIdleTime
+          CPU Interrupts:
+            units: Interrupts / second
+            miny: 0
+            graphpoints:
+              procInterrupts:
+                format: '%5.0lf'
+                legend: Interrupts
+                dpName: procInterrupts_procInterrupts
+          Disk Utilization:
+            units: percent
+            miny: 0
+            maxy: 100
+            graphpoints:
+              diskPercent:
+                lineType: AREA
+                format: '%5.1lf%%'
+                legend: Used
+                dpName: vsxDiskPercent_vsxDiskPercent
+
+      ### RAID Volume ###
+      vsxRAIDVolumeTemplate:
+        description: SNMP monitoring for VSX RAID Volume
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VsxRAIDVolume
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+          raidVolumeState:
+            # Raid state
+            oid: 1.3.6.1.4.1.2620.1.6.7.7.1.1.6
+            datapoints:
+              raidVolumeState: {}
+          raidVolumeFlags:
+            # Raid Volume Flags
+            oid: 1.3.6.1.4.1.2620.1.6.7.7.1.1.7
+            datapoints:
+              raidVolumeFlags: {}
+
+      ### RAID Disk ###
+      vsxRAIDDiskTemplate:
+        description: SNMP monitoring for VSX RAID Disk
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VsxRAIDDisk
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+          raidDiskState:
+            # Raid disk state
+            oid: 1.3.6.1.4.1.2620.1.6.7.7.2.1.9
+            datapoints:
+              raidDiskState: {}
+          raidDiskFlags:
+            # Raid disk flags
+            oid: 1.3.6.1.4.1.2620.1.6.7.7.2.1.10
+            datapoints:
+              raidDiskFlags: {}
+
+      ### Multi Disk ###
+      vsxMultiDiskTemplate:
+        description: SNMP monitoring for VSX Multi Disk
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VsxMultiDisk
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.PythonSnmpDataSource.PythonSnmpDataSourcePlugin
+          multiDiskUsed:
+            # Disk Partition used space in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.6.1.4
+            datapoints:
+              used: {}
+          multiDiskFreeTotalBytes:
+            # Disk Partition free total space in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.6.1.5
+            datapoints:
+              freeTotalBytes: {}
+          multiDiskFreeTotalPercent:
+            # Disk Partition free total space in per cent
+            oid: 1.3.6.1.4.1.2620.1.6.7.6.1.6
+            datapoints:
+              freeTotalPct: {}
+          multiDiskFreeAvailableBytes:
+            # Disk Partition free available space (not reserved by the OS) in bytes
+            oid: 1.3.6.1.4.1.2620.1.6.7.6.1.7
+            datapoints:
+              freeAvailBytes: {}
+          multiDiskFreeAvailablePercent:
+            # Disk Partition free available space in per cent
+            oid: 1.3.6.1.4.1.2620.1.6.7.6.1.8
+            datapoints:
+              freeAvailPct: {}
+        graphs:
+          Disk Free Space:
+            units: percent
+            miny: 0
+            maxy: 100
+            graphpoints:
+              multiDiskFreeTotalPercent:
+                format: '%5.1lf%%'
+                legend: Free total
+                dpName: multiDiskFreeTotalPercent_freeTotalPct
+              multiDiskFreeAvailablePercent:
+                format: '%5.1lf%%'
+                legend: Free available
+                dpName: multiDiskFreeAvailablePercent_freeAvailPct
+          Disk:
+            base: true
+            units: bytes
+            graphpoints:
+              multiDiskUsed:
+                lineType: AREA
+                stacked: true
+                legend: Used
+                dpName: multiDiskUsed_used
+              multiDiskFreeTotalBytes:
+                lineType: AREA
+                stacked: true
+                legend: Free total
+                dpName: multiDiskFreeTotalBytes_freeTotalBytes
+              multiDiskFreeAvailableBytes:
+                lineType: AREA
+                stacked: true
+                legend: Free available
+                dpName: multiDiskFreeAvailableBytes_freeAvailBytes
+
+      ### Vsx Device (component) ###
+      vsxDeviceTemplate:
+        description: SNMP monitoring for VSX Device (component)
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VsxDevice
+        datasources:
+          vsxStatusHAState:
+            # High Availability Status
+            type: SNMP String Status DataSource
+            plugin_classname: ZenPacks.zenoss.PS.Util.datasources.SnmpStringStatusDataSource.SnmpStringStatusDataSourcePlugin
+            oid: 1.3.6.1.4.1.2620.1.16.22.1.1.9
+            eventClass: /Status/VSX/HA
+            severity: Critical
+            resultSeverityMap:
+                'Active': 0
+                'Standby': 3
+                'Backup': 3
+                'N/A': 3
+
+  /Network/Check Point/VSX/Device:
+    remove: true
+    zProperties:
+      zPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+      zDeviceTemplates:
+        - VirtualDevice
+        - VsHaState
+        - VsVpnSiteToSite
+        - VsVpnRemoteAccess
+        - VsClusterStatus
+        - VsUrlFilter
+        - VsAppControl
+        - VsAntiBotVirus
+        - VsIdentityAwareness
+        - VsThreatEmulation
+        - VsSmartEvent
+    templates:
+      VirtualDevice:
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+        datasources:
+          # snmpindex (ex. 2.0, 5.0) will be added to all oids automatically
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.Vs0ContextSnmpPlugin
+          ### CPU ###
+          vsxStatusCPUUsage1sec:
+            # CPU usage (%) in the last 1 second, averaged for all cores
+            oid: 1.3.6.1.4.1.2620.1.16.22.2.1.1
+            datapoints:
+              cpu1sec: {}
+          vsxStatusCPUUsage10sec:
+            # CPU usage (%) in the last 10 seconds, averaged for all cores
+            oid: 1.3.6.1.4.1.2620.1.16.22.2.1.2
+            datapoints:
+              cpu10sec: {}
+          vsxStatusCPUUsage1min:
+            # CPU usage (%) in the last 1 minute, averaged for all cores
+            oid: 1.3.6.1.4.1.2620.1.16.22.2.1.3
+            datapoints:
+              cpu1min: {}
+          vsxStatusCPUUsage1hr:
+            # CPU usage (%) in the last 1 hour, averaged for all cores
+            oid: 1.3.6.1.4.1.2620.1.16.22.2.1.4
+            datapoints:
+              cpu1hr: {}
+          vsxStatusCPUUsage24hr:
+            # CPU usage (%) in the last 24 hours, averaged for all cores
+            oid: 1.3.6.1.4.1.2620.1.16.22.2.1.5
+            datapoints:
+              cpu24hr: {}
+          ### Memory ###
+          vsxStatusMemoryUsage:
+            # VS memory usage (Bytes)
+            oid: 1.3.6.1.4.1.2620.1.16.22.3.1.3
+            datapoints:
+              memoryUsage: {}
+          ### Traffic ###
+          vsxCountersConnNum:
+            # Number of active connections
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.2
+            datapoints:
+              connNum: {}
+          vsxCountersConnPeakNum:
+            # Peak number of active connections
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.3
+            datapoints:
+              connPeakNum: {}
+          vsxCountersPackets:
+            # Total number of packets processed
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.5
+            datapoints:
+              packets: {}
+          vsxCountersDroppedTotal:
+            # Total number of dropped packets
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.6
+            datapoints:
+              droppedTotal: {}
+          vsxCountersAcceptedTotal:
+            # "Total number of accepted packets
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.7
+            datapoints:
+              acceptedTotal: {}
+          vsxCountersRejectedTotal:
+            # Total number of rejected packets
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.8
+            datapoints:
+              rejectedTotal: {}
+          vsxCountersBytesAcceptedTotal:
+            # Total number of accepted bytes
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.9
+            datapoints:
+              acceptedBytes: {}
+          vsxCountersBytesDroppedTotal:
+            # Total number of dropped bytes
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.10
+            datapoints:
+              droppedBytes: {}
+          vsxCountersBytesRejectedTotal:
+            # Total number of rejected bytes
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.11
+            datapoints:
+              rejectedBytes: {}
+          vsxCountersLoggedTotal:
+            # Total number of logs sent
+            oid: 1.3.6.1.4.1.2620.1.16.23.1.1.12
+            datapoints:
+              loggedTotal: {}
+        graphs:
+          VSX - CPU Usage:
+            units: percent
+            miny: 0
+            maxy: 100
+            graphpoints:
+              vsxStatusCPUUsage1sec:
+                format: '%5.1lf%%'
+                legend: Last 1 second
+                dpName: vsxStatusCPUUsage1sec_cpu1sec
+              vsxStatusCPUUsage10sec:
+                format: '%5.1lf%%'
+                legend: Last 10 seconds
+                dpName: vsxStatusCPUUsage10sec_cpu10sec
+              vsxStatusCPUUsage1min:
+                format: '%5.1lf%%'
+                legend: Last 1 minute
+                dpName: vsxStatusCPUUsage1min_cpu1min
+              vsxStatusCPUUsage1hr:
+                format: '%5.1lf%%'
+                legend: Last 1 hour
+                dpName: vsxStatusCPUUsage1hr_cpu1hr
+              vsxStatusCPUUsage24hr:
+                format: '%5.1lf%%'
+                legend: Last 24 hours
+                dpName: vsxStatusCPUUsage24hr_cpu24hr
+          VSX - Memory Usage:
+            base: true
+            units: bytes
+            miny: 0
+            graphpoints:
+              vsxStatusMemoryUsage:
+                format: '%5.1lf%'
+                legend: Memory
+                lineType: AREA
+                dpName: vsxStatusMemoryUsage_memoryUsage
+          VSX - Connections:
+            units: connections
+            miny: 0
+            graphpoints:
+              vsxCountersConnNum:
+                format: '%6.0lf'
+                lineType: AREA
+                legend: Active
+                dpName: vsxCountersConnNum_connNum
+              vsxCountersConnPeakNum:
+                format: '%6.0lf'
+                legend: Peak
+                dpName: vsxCountersConnPeakNum_connPeakNum
+          VSX - Packet Handling:
+            units: packets
+            miny: 0
+            graphpoints:
+              vsxCountersPackets:
+                format: '%6.0lf'
+                legend: Processed
+                dpName: vsxCountersPackets_packets
+              vsxCountersDroppedTotal:
+                format: '%6.0lf'
+                legend: Dropped
+                dpName: vsxCountersDroppedTotal_droppedTotal
+              vsxCountersAcceptedTotal:
+                format: '%6.0lf'
+                legend: Accepted
+                dpName: vsxCountersAcceptedTotal_acceptedTotal
+              vsxCountersRejectedTotal:
+                format: '%6.0lf'
+                legend: Rejected
+                dpName: vsxCountersRejectedTotal_rejectedTotal
+              vsxCountersLoggedTotal:
+                format: '%6.0lf'
+                legend: Logged
+                dpName: vsxCountersLoggedTotal_loggedTotal
+          VSX - Bytes Handling:
+            base: true
+            units: bytes
+            miny: 0
+            graphpoints:
+              vsxCountersBytesAcceptedTotal:
+                legend: Accepted
+                dpName: vsxCountersBytesAcceptedTotal_acceptedBytes
+              vsxCountersBytesDroppedTotal:
+                legend: Dropped
+                dpName: vsxCountersBytesDroppedTotal_droppedBytes
+              vsxCountersBytesRejectedTotal:
+                legend: Rejected
+                dpName: vsxCountersBytesRejectedTotal_rejectedBytes
+      ### High Availability ###
+      VsHaState:
+        description: Virtual System HA status
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+        datasources:
+          vsxStatusHAState:
+            # High Availability Status
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.HaStateSnmp
+            oid: 1.3.6.1.4.1.2620.1.16.22.1.1.9
+            datapoints:
+              haState: {}
+      ### VPN Site-to-Site ###
+      VsVpnSiteToSite:
+        description: Virtual System VPN Site-to-Site stats
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.VsxSnmpPlugin
+          cpvEncPackets:
+            # Encrypted packets
+            oid: 1.3.6.1.4.1.2620.1.2.4.1.1.0$
+            datapoints:
+              cpvEncPackets: {}
+          cpvDecPackets:
+            # Decrypted packets
+            oid: 1.3.6.1.4.1.2620.1.2.4.1.2.0$
+            datapoints:
+              cpvDecPackets: {}
+        graphs:
+          VPN Site-to-Site packets:
+            units: packets
+            miny: 0
+            graphpoints:
+              cpvEncPackets:
+                format: '%6.0lf'
+                legend: Encrypted
+                dpName: cpvEncPackets_cpvEncPackets
+              cpvDecPackets:
+                format: '%6.0lf'
+                legend: Decrypted
+                dpName: cpvDecPackets_cpvDecPackets
+      ### VPN Remote Access ###
+      VsVpnRemoteAccess:
+        description: Virtual System VPN Remote Access user state
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.VsxSnmpPlugin
+          raUserState:
+            # Remote Access user state
+            oid: 1.3.6.1.4.1.2620.500.9000.1.20.0$
+            datapoints:
+              raUserState: {}
+        thresholds:
+          Remote Access User State:
+            type: StatusThreshold
+            dsnames: [ raUserState_raUserState ]
+            eventClass: /Status/VSX/RA
+            severityMapping:
+              3: [ 0, Active ]
+              4: [ 4, Destroy ]
+              129: [ 2, Idle ]
+              130: [ 2, Phase1 ]
+              131: [ 4, Down ]
+              132: [ 2, Init ]
+      ### Cluster ###
+      VsClusterStatus:
+        description: Virtual System Cluster status
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.ClusterStatusSnmp
+          haStarted:
+            # HA started
+            oid: 1.3.6.1.4.1.2620.1.5.5.0$
+            datapoints:
+              haStarted: {}
+          vsHaState:
+            # HA state
+            oid: 1.3.6.1.4.1.2620.1.5.6.0$
+            datapoints:
+              vsHaState: {}
+          haStatCode:
+            # Status code
+            oid: 1.3.6.1.4.1.2620.1.5.101.0$
+            datapoints:
+              statusCode: {}
+          haStatShort:
+            # Status short
+            oid: 1.3.6.1.4.1.2620.1.5.102.0$
+            datapoints:
+              shortDesc: {}
+      ### URL Filtering ###
+      VsUrlFilter:
+        description: Virtual System URL Filter status
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.UrlFilterSnmp
+          RADStatusCode:
+            # RAD Status code
+            oid: 1.3.6.1.4.1.2620.1.43.3.1.0$
+            datapoints:
+              statusCode: {}
+          RADStatusDesc:
+            # RAD status description
+            oid: 1.3.6.1.4.1.2620.1.43.3.2.0$
+            datapoints:
+              statusDesc: {}
+          urlFilteringStatus:
+            # Application Control Status code
+            oid: 1.3.6.1.4.1.2620.1.43.3.101.0$
+            datapoints:
+              statusCode: {}
+          urlFilteringShort:
+            # Application Control Status - Short Description
+            oid: 1.3.6.1.4.1.2620.1.43.3.102.0$
+            datapoints:
+              shortDesc: {}
+      ### Application Control ###
+      VsAppControl:
+        description: Virtual System Application Control status
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.AppControlSnmp
+          appStatusCode:
+            # Application Control Status code
+            oid: 1.3.6.1.4.1.2620.1.39.101.0$
+            datapoints:
+              statusCode: {}
+          appShortDesc:
+            # Application Control Status - Long Description
+            oid: 1.3.6.1.4.1.2620.1.39.102.0$
+            datapoints:
+              shortDesc: {}
+      ### Anti-Bot & Anti-Virus ###
+      VsAntiBotVirus:
+        description: Virtual System Anti-Bot & Anti-Virus status
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.AntiBotVirusSnmp
+          amwStatusCode:
+            # Anti-Bot & Anti-Virus Status code
+            oid: 1.3.6.1.4.1.2620.1.46.101.0$
+            datapoints:
+              statusCode: {}
+          amwStatusShortDesc:
+            # Anti-Bot & Anti-Virus Status - Short Description
+            oid: 1.3.6.1.4.1.2620.1.46.102.0$
+            datapoints:
+              shortDesc: {}
+      ### Identity Awareness ###
+      VsIdentityAwareness:
+        description: Virtual System Identity Awareness status
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.IdentityAwarenessSnmp
+          idaStatus:
+            # Identity Awarness Status code
+            oid: 1.3.6.1.4.1.2620.1.38.101.0$
+            datapoints:
+              statusCode: {}
+          idaStatusShortDesc:
+            # Identity Awarness Status - Short Description
+            oid: 1.3.6.1.4.1.2620.1.38.102.0$
+            datapoints:
+              shortDesc: {}
+      ### Threat Emulation ###
+      VsThreatEmulation:
+        description: Virtual System Threat Emulation status
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.ThreatEmulationSnmp
+          teStatusCode:
+            # Threat-Emulation Status code
+            oid: 1.3.6.1.4.1.2620.1.49.101.0$
+            datapoints:
+              statusCode: {}
+          teStatusShortDesc:
+            # Threat-Emulation Status - Short Description
+            oid: 1.3.6.1.4.1.2620.1.49.102.0$
+            datapoints:
+              shortDesc: {}
+      ### Smart Event ###
+      VsSmartEvent:
+        description: Virtual System Smart Event status
+        targetPythonClass: ZenPacks.zenoss.CheckPointMonitor.VirtualDevice
+        datasources:
+          DEFAULTS:
+            type: Python SNMP DataSource
+            plugin_classname: ZenPacks.zenoss.CheckPointMonitor.dsplugins.SmartEventSnmp
+          cpsemdProcAlive:
+            # CPSEMD Process is alive (0 - down, 1 - up)
+            oid: 1.3.6.1.4.1.2620.1.25.1.1$
+            datapoints:
+              cpsemdProcAlive: {}
+          cpsemdStatCode:
+            # CPSEMD Status code
+            oid: 1.3.6.1.4.1.2620.1.25.1.101$
+            datapoints:
+              statusCode: {}
+          cpsemdStatShortDescr:
+            # CPSEMD Status short description
+            oid: 1.3.6.1.4.1.2620.1.25.1.102$
+            datapoints:
+              shortDesc: {}
+        thresholds:
+          CPSEMD Process Status:
+            type: StatusThreshold
+            dsnames: [ cpsemdProcAlive_cpsemdProcAlive ]
+            eventClass: /Status/VSX/CPSEMD
+            severityMapping:
+              0: [ 4, Down ]
+              1: [ 0, Up ]
+
+class_relationships:
+  - GatewayDevice 1:MC VsxDevice
+  - GatewayDevice 1:MC VsxRAIDVolume
+  - GatewayDevice 1:MC VsxMultiDisk
+  - VsxRAIDVolume 1:MC VsxRAIDDisk
+
+event_classes:
+  /Status/HA:
+    transform: |-
+      import re
+      component = 'HA'
+      summary = evt.summary
+      evt.component = component
+      evt.summary = re.sub('haState', component, summary)
+  /Status/VPN:
+    transform: |-
+      import re
+      component = 'Policy Server'
+      summary = evt.summary
+      evt.component = component
+      evt.summary = re.sub('dtpsState', component, summary)
+  /Status/Firewall:
+    transform: |-
+      import re
+      component = 'Firewall'
+      summary = evt.summary
+      evt.component = component
+      evt.summary = re.sub('fwState', component, summary)
+  /Status/VSX/HA:
+    remove: true
+    mappings:
+      VsHA:
+        eventClassKey: VsHA
+  /Status/VSX/Cluster:
+    remove: true
+    mappings:
+      VsCluster:
+        eventClassKey: VsCluster
+  /Status/VSX/URLFilter:
+    remove: true
+    mappings:
+      VsUrlFilter:
+        eventClassKey: VsUrlFilter
+  /Status/VSX/AppControl:
+    remove: true
+    mappings:
+      VsAppControl:
+        eventClassKey: VsAppControl
+  /Status/VSX/AMW:
+    remove: true
+    mappings:
+      VsAntiBotVirus:
+        eventClassKey: VsAntiBotVirus
+  /Status/VSX/IDA:
+    remove: true
+    mappings:
+      VsIdentityAwareness:
+        eventClassKey: VsIdentityAwareness
+  /Status/VSX/TE:
+    remove: true
+    mappings:
+      VsThreatEmulation:
+        eventClassKey: VsThreatEmulation
+  /Status/VSX/CPSEMD:
+    remove: true
+    mappings:
+      VsSmartEvent:
+        eventClassKey: VsSmartEvent
+  /App/Zenoss/Collection:
+    remove: true
+    # from ZenPack dsplugins
+    mappings:
+      VsxSnmpPluginPoints:
+        eventClassKey: VsxSnmpPluginPoints
+      VpnSiteToSiteSnmpPoints:
+        eventClassKey: VpnSiteToSiteSnmpPoints
+      VpnRemoteAccessSnmpPoints:
+        eventClassKey: VpnRemoteAccessSnmpPoints
+      ClusterStatusSnmpPoints:
+        eventClassKey: ClusterStatusSnmpPoints
+      UrlFilterSnmpPoints:
+        eventClassKey: UrlFilterSnmpPoints
+      AppControlSnmpPoints:
+        eventClassKey: AppControlSnmpPoints
+      AntiBotVirusSnmpPoints:
+        eventClassKey: AntiBotVirusSnmpPoints
+      IdentityAwarenessSnmpPoints:
+        eventClassKey: IdentityAwarenessSnmpPoints
+      ThreatEmulationSnmpPoints:
+        eventClassKey: ThreatEmulationSnmpPoints
+      SmartEventSnmpPoints:
+        eventClassKey: SmartEventSnmpPoints
+  /VSX/Job/VsxDevice:
+    remove: true
+    mappings:
+      VsxDeviceJob:
+        eventClassKey: VsxDeviceJob
