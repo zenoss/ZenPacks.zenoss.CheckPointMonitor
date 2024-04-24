@@ -338,6 +338,12 @@ SNMP Virtual System (VS) Mode Notes
 Changelog
 ---------
 
+.. ZenPacks.zenoss.CheckPointMonitor-3.0.1 this line and surrounding blanks are required
+
+3.0.1
+
+* SVC-3775 Update for Garfield jobs change
+
 3.0.0
 
 Features:
